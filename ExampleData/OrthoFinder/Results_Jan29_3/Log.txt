@@ -1,0 +1,4 @@
+2024-01-29 17:47:53 : Started OrthoFinder version 2.5.5
+Command Line: /home/yiliu/test_ortho/OrthoFinder/.venv/bin/orthofinder -f ExampleData
+
+WorkingDirectory_Base: /home/yiliu/test_ortho/OrthoFinder/ExampleData/OrthoFinder/Results_Jan29_3/WorkingDirectory/
