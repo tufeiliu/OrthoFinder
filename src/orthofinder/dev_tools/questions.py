@@ -1,7 +1,7 @@
 import inspect 
 
 
-def question_code(message: str, 
+def question(message: str, 
                   counter_ctrl: list[str] = [""],
                   question_no: list[int] = [0]) -> None:
     
@@ -14,7 +14,7 @@ def question_code(message: str,
         counter_ctrl[0] = question_message
         print()
         print('*'*50)
-        print(f">>> {question_no[0]}.CODE QUESTION:")
+        print(f">>> {question_no[0]}. QUESTION:")
         print(question_message)
         print('*'*50)
 

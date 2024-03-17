@@ -1,3 +1,13 @@
 .venv/*
 *.egg*
 __pycache__/
+Chordata/
+ExampleData0/
+aaindex2.txt:Zone.Identifier
+default.sh
+fungal_dataset/
+orthogroups_compare.py
+orthogroups_compare/
+orthologues_compare/
+otest.py
+substitution_matrix/

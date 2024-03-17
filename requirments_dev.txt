@@ -1,6 +1,0 @@
-python-semantic-release
-mypy
-pytest
-pytest-cov
-tox
-delayed-assert

@@ -32,8 +32,8 @@ from orthofinder import parallel_task_manager
 import os                                       # Y
 os.environ["OPENBLAS_NUM_THREADS"] = "1"    # fix issue with numpy/openblas. Will mean that single threaded options aren't automatically parallelised 
 
-from orthofinder.dev_tools.decorators import timeit, question_func
-from orthofinder.dev_tools.questions import question_code
+from orthofinder.dev_tools.decorators import timeit
+from orthofinder.dev_tools.questions import question
 
 from orthofinder.parse_flags import get_example_data_dir, get_flag_name
 from orthofinder.version import __version__
@@ -81,7 +81,7 @@ if getattr(sys, 'frozen', False):
     __location__ = os.path.split(sys.executable)[0]
 else:
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-    
+
 max_int = sys.maxsize
 ok = False
 while not ok:
@@ -91,7 +91,7 @@ while not ok:
     except OverflowError:
         max_int = int(max_int/10)
 sys.setrecursionlimit(10**6)
-    
+
 fastaExtensions = {"fa", "faa", "fasta", "fas", "pep"}
 # uncomment to get round problem with python multiprocessing library that can set all cpu affinities to a single cpu
 # This can cause use of only a limited number of cpus in other cases so it has been commented out
@@ -238,8 +238,12 @@ class MCL:
         util.PrintTime("Ran MCL")  
     
     @staticmethod
-    def WriteOrthogroupFiles(ogs, idsFilenames, resultsBaseFilename, clustersFilename_pairs):
+    def WriteOrthogroupFiles(ogs, 
+                             idsFilenames, 
+                             resultsBaseFilename, 
+                             clustersFilename_pairs):
         outputFN = resultsBaseFilename + ".txt"
+
         try:
             fullDict = dict()
             for idsFilename in idsFilenames:
@@ -247,10 +251,12 @@ class MCL:
                 idDict = idExtract.GetIDToNameDict()
                 fullDict.update(idDict)
             MCL.CreateOGs(ogs, outputFN, fullDict)
+
         except KeyError as e:
             sys.stderr.write("ERROR: Sequence ID not found in %s\n" % idsFilename)
             sys.stderr.write(str(e) + "\n")
             files.FileHandler.LogFailAndExit(("ERROR: Sequence ID not found in %s\n" % idsFilename) + str(e) + "\n")        
+        
         except RuntimeError as error:
             print(str(error))
             if str(error).startswith("ERROR"):
@@ -278,7 +284,6 @@ class MCL:
                               resultsBaseFilename):
         
         nSpecies = len(speciesNamesDict) 
-        
         ogs_names = [[idToNameDict[seq] for seq in og] for og in ogs]
         ogs_ints = [[list(map(int, sequence.split("_"))) for sequence in og] for og in ogs]
     
@@ -286,13 +291,18 @@ class MCL:
         outputFilename = resultsBaseFilename + ".tsv"
         outputFilename_counts = resultsBaseFilename + ".GeneCount.tsv"
         singleGeneFilename = resultsBaseFilename + "_UnassignedGenes.tsv"
-        with open(outputFilename, csv_write_mode) as outputFile, open(singleGeneFilename, csv_write_mode) as singleGeneFile, open(outputFilename_counts, csv_write_mode) as outFile_counts:
+        with open(outputFilename, csv_write_mode) as outputFile, \
+            open(singleGeneFilename, csv_write_mode) as singleGeneFile, \
+            open(outputFilename_counts, csv_write_mode) as outFile_counts:
+
             fileWriter = csv.writer(outputFile, delimiter="\t")
             fileWriter_counts = csv.writer(outFile_counts, delimiter="\t")
             singleGeneWriter = csv.writer(singleGeneFile, delimiter="\t")
+
             for writer in [fileWriter, singleGeneWriter]:
                 row = ["Orthogroup"] + [speciesNamesDict[index] for index in speciesToUse]
                 writer.writerow(row)
+
             fileWriter_counts.writerow(row + ['Total'])
             
             for iOg, (og, og_names) in enumerate(zip(ogs_ints, ogs_names)):
@@ -407,13 +417,20 @@ def GetNumberOfSequencesInFile(filename):
             if line.startswith(">"): count+=1
     return count
 
-""" Question: Do I want to do all BLASTs or just the required ones? It's got to be all BLASTs I think. They could potentially be 
-run after the clustering has finished."""
-def GetOrderedSearchCommands(seqsInfo, speciesInfoObj, qDoubleBlast, search_program, prog_caller):
-    """ Using the nSeq1 x nSeq2 as a rough estimate of the amount of work required for a given species-pair, returns the commands 
-    ordered so that the commands predicted to take the longest come first. This allows the load to be balanced better when processing 
-    the BLAST commands.
+""" Question: Do I want to do all BLASTs or just the required ones? 
+    It's got to be all BLASTs I think. They could potentially be 
+    run after the clustering has finished.
+"""
+def GetOrderedSearchCommands(seqsInfo, speciesInfoObj, qDoubleBlast, search_program, prog_caller, options):
+    """ 
+        Using the nSeq1 x nSeq2 as a rough estimate of 
+        the amount of work required for a given species-pair, 
+        returns the commands ordered so that the commands 
+        predicted to take the longest come first. 
+        This allows the load to be balanced better when processing 
+        the BLAST commands.
     """
+
     iSpeciesPrevious = list(range(speciesInfoObj.iFirstNewSpecies))
     iSpeciesNew = list(range(speciesInfoObj.iFirstNewSpecies, speciesInfoObj.nSpAll))
     speciesPairs = [(i, j) for i, j in itertools.product(iSpeciesNew, iSpeciesNew) if (qDoubleBlast or i <=j)] + \
@@ -421,10 +438,21 @@ def GetOrderedSearchCommands(seqsInfo, speciesInfoObj, qDoubleBlast, search_prog
                    [(i, j) for i, j in itertools.product(iSpeciesPrevious, iSpeciesNew) if (qDoubleBlast or i <=j)] 
     taskSizes = [seqsInfo.nSeqsPerSpecies[i]*seqsInfo.nSeqsPerSpecies[j] for i,j in speciesPairs]
     taskSizes, speciesPairs = util.SortArrayPairByFirst(taskSizes, speciesPairs, True)
+
     if search_program == "blast":
         commands = [" ".join(["blastp", "-outfmt", "6", "-evalue", "0.001", "-query", files.FileHandler.GetSpeciesFastaFN(iFasta), "-db", files.FileHandler.GetSpeciesDatabaseN(iDB), "-out", files.FileHandler.GetBlastResultsFN(iFasta, iDB, qForCreation=True)]) for iFasta, iDB in speciesPairs]
+    
     else:
-        commands = [prog_caller.GetSearchMethodCommand_Search(search_program, files.FileHandler.GetSpeciesFastaFN(iFasta), files.FileHandler.GetSpeciesDatabaseN(iDB, search_program), files.FileHandler.GetBlastResultsFN(iFasta, iDB, qForCreation=True)) for iFasta, iDB in speciesPairs]
+        commands = [prog_caller.GetSearchMethodCommand_Search(search_program,  
+                                                              files.FileHandler.GetSpeciesFastaFN(iFasta), 
+                                                              files.FileHandler.GetSpeciesDatabaseN(iDB, search_program), 
+                                                              files.FileHandler.GetBlastResultsFN(iFasta, iDB, qForCreation=True),
+                                                              scorematrix=options.score_matrix,
+                                                              gapopen=options.gapopen,
+                                                              gapextend=options.gapextend
+                                                              ) for iFasta, iDB in speciesPairs]
+    
+
     return commands     
 
 """
@@ -841,6 +869,7 @@ def GetProgramCaller():
     config_file = os.path.join(__location__, 'configfiles/config.json') 
     pc = program_caller.ProgramCaller(config_file if os.path.exists(config_file) else None)
     config_file_user = os.path.expanduser("~/config_orthofinder_user.json")
+    # config_file_user = os.path.join(__location__, "configfiles/config_orthofinder_user.json")
 
     if os.path.exists(config_file_user):
         pc_user = program_caller.ProgramCaller(config_file_user)
@@ -973,6 +1002,9 @@ class Options(object):#
         self.dna = False
         self.fewer_open_files = True  # By default only open O(n) orthologs files at a time
         self.fewer_files = False  # On complete, have only one orthologs file per species
+        self.score_matrix = "BLOSUM62"
+        self.gapopen = None
+        self.gapextend = None
 
     def what(self):
         for k, v in self.__dict__.items():
@@ -1261,13 +1293,22 @@ def ProcessArgs(prog_caller, args):
         elif arg == "-h" or arg == "--help":
             PrintHelp(prog_caller)
             util.Success()
+
+        elif arg == "--matrix" or arg == "--custom-matrix":
+            options.score_matrix = files.FileHandler.GetScoreMatrix(args.pop(0))
+
+        elif arg == "--gapopen":
+            options.gapopen = str(abs(int(args.pop(0))))
+
+        elif arg == "--gapextend":
+            options.gapextend = str(abs(int(args.pop(0))))
         else:
             print("Unrecognised argument: %s\n" % arg)
             util.Fail()    
     
     # set a default for number of algorithm threads
     if options.nProcessAlg is None:
-        question_code('Why 16 and 8?')
+        question('Why 16 and 8?')
         options.nProcessAlg = min(16, max(1, int(options.nBlast/8)))
 
     if options.nBlast < 1:
@@ -1326,6 +1367,7 @@ def ProcessArgs(prog_caller, args):
     return options, fastaDir, continuationDir, resultsDir_nonDefault, pickleDir_nonDefault            
 
 def GetXMLSpeciesInfo(seqsInfoObj, options):
+
     # speciesInfo:  name, NCBITaxID, sourceDatabaseName, databaseVersionFastaFile
     util.PrintUnderline("Reading species information file")
     # do this now so that we can alert user to any errors prior to running the algorithm
@@ -1336,11 +1378,13 @@ def GetXMLSpeciesInfo(seqsInfoObj, options):
     
     with open(options.speciesXMLInfoFN, 'r') as speciesInfoFile:
         reader = csv.reader(speciesInfoFile, delimiter = "\t")
+
         for iLine, line in enumerate(reader):
             if len(line) != 5:
                 # allow for an extra empty line at the end
                 if len(line) == 0 and iLine == len(userFastaFilenames):
                     continue
+
                 print("ERROR")
                 print("Species information file %s line %d is incorrectly formatted." % (options.speciesXMLInfoFN, iLine + 1))
                 print("File should be contain one line per species")
@@ -1383,20 +1427,29 @@ def IDsFileOK(filename):
     return True, None
 
 def CheckDependencies(options, prog_caller, dirForTempFiles):
+
     util.PrintUnderline("Checking required programs are installed")
     if (options.qStartFromFasta):
         if options.search_program == "blast":
             if not CanRunBLAST(): util.Fail()
+
         else:
             d_deps_check = files.FileHandler.GetDependenciesCheckDir()
-            success, stdout, stderr, cmd = prog_caller.TestSearchMethod(options.search_program, d_deps_check)
+            success, stdout, stderr, cmd = prog_caller.TestSearchMethod(options.search_program, 
+                                                                        d_deps_check,
+                                                                        scorematrix=options.score_matrix,
+                                                                        gapopen=options.gapopen,
+                                                                        gapextend=options.gapextend)
+            
             if not success:
                 print("\nERROR: Cannot run %s" % options.search_program)
                 prog_caller.PrintDependencyCheckFailure(cmd)
                 print("Please check %s is installed and that the executables are in the system path\n" % options.search_program)
                 util.Fail()
+
     if (options.qStartFromFasta or options.qStartFromBlast) and not CanRunMCL():
         util.Fail()
+
     if not (options.qStopAfterPrepare or options.qStopAfterSeqs or options.qStopAfterGroups):
         if not orthologues.CanRunOrthologueDependencies(dirForTempFiles, 
                                                             options.qMSATrees, 
@@ -1407,6 +1460,7 @@ def CheckDependencies(options, prog_caller, dirForTempFiles):
                                                             options.recon_method,
                                                             prog_caller, 
                                                             options.qStopAfterAlignments):
+            
             print("Dependencies have been met for inference of orthogroups but not for the subsequent orthologue inference.")
             print("Either install the required dependencies or use the option '-og' to stop the analysis after the inference of orthogroups.\n")
             util.Fail()
@@ -1455,10 +1509,19 @@ def DoOrthogroups(options, speciesInfoObj, seqsInfo):
     resultsBaseFilename = files.FileHandler.GetOrthogroupResultsFNBase()
     idsDict = MCL.WriteOrthogroupFiles(ogs, [files.FileHandler.GetSequenceIDsFN()], resultsBaseFilename, clustersFilename_pairs)
     speciesNamesDict = SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN())
-    MCL.CreateOrthogroupTable(ogs, idsDict, speciesNamesDict, speciesInfoObj.speciesToUse, resultsBaseFilename)
+    MCL.CreateOrthogroupTable(ogs, 
+                              idsDict, 
+                              speciesNamesDict, 
+                              speciesInfoObj.speciesToUse, 
+                              resultsBaseFilename)
     
-    # Write Orthogroup FASTA files    
-    ogSet = orthologues.OrthoGroupsSet(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll, options.qAddSpeciesToIDs, idExtractor = util.FirstWordExtractor)
+    # Write Orthogroup FASTA files   
+    ogSet = orthologues.OrthoGroupsSet(files.FileHandler.GetWorkingDirectory1_Read(), 
+                                       speciesInfoObj.speciesToUse, 
+                                       speciesInfoObj.nSpAll, 
+                                       options.qAddSpeciesToIDs, 
+                                       idExtractor = util.FirstWordExtractor)
+
     treeGen = trees_msa.TreesForOrthogroups(None, None, None)
     fastaWriter = trees_msa.FastaWriter(files.FileHandler.GetSpeciesSeqsDir(), speciesInfoObj.speciesToUse)
     d_seqs = files.FileHandler.GetResultsSeqsDir()
@@ -1547,51 +1610,76 @@ def ProcessPreviousFiles(workingDir_list, qDoubleBlast):
 
 # 6
 def CreateSearchDatabases(seqsInfoObj, options, prog_caller):
+    
+    question("Why not using speciesInfoObj.nSpAll?")
     nDB = max(seqsInfoObj.speciesToUse) + 1
+
     for iSp in range(nDB):
         if options.search_program == "blast":
             command = " ".join(["makeblastdb", "-dbtype", "prot", "-in", files.FileHandler.GetSpeciesFastaFN(iSp), "-out", files.FileHandler.GetSpeciesDatabaseN(iSp)])
             util.PrintTime("Creating Blast database %d of %d" % (iSp + 1, nDB))
             RunBlastDBCommand(command) 
+
         else:
-            command = prog_caller.GetSearchMethodCommand_DB(options.search_program, files.FileHandler.GetSpeciesFastaFN(iSp), files.FileHandler.GetSpeciesDatabaseN(iSp, options.search_program))
+            command = prog_caller.GetSearchMethodCommand_DB(options.search_program, 
+                                                            files.FileHandler.GetSpeciesFastaFN(iSp), 
+                                                            files.FileHandler.GetSpeciesDatabaseN(iSp, options.search_program),
+                                                            options.score_matrix,
+                                                            options.gapopen,
+                                                            options.gapextend)
+
             util.PrintTime("Creating %s database %d of %d" % (options.search_program, iSp + 1, nDB))
             ret_code = parallel_task_manager.RunCommand(command, qPrintOnError=True, qPrintStderr=False)
+            
             if ret_code != 0:
                 files.FileHandler.LogFailAndExit("ERROR: diamond makedb failed")
 
 # 7
 def RunSearch(options, speciessInfoObj, seqsInfo, prog_caller):
+
     name_to_print = "BLAST" if options.search_program == "blast" else options.search_program
+    
+    question("Don't understand this option.")
     if options.qStopAfterPrepare:
         util.PrintUnderline("%s commands that must be run" % name_to_print)
+
     else:        
         util.PrintUnderline("Running %s all-versus-all" % name_to_print)
-    commands = GetOrderedSearchCommands(seqsInfo, speciessInfoObj, options.qDoubleBlast, options.search_program, prog_caller)
+    
+    commands = GetOrderedSearchCommands(seqsInfo, speciessInfoObj, options.qDoubleBlast, options.search_program, prog_caller, options)
+    
     if options.qStopAfterPrepare:
         for command in commands:
             print(command)
         util.Success()
+
     print("Using %d thread(s)" % options.nBlast)
     util.PrintTime("This may take some time....")  
     cmd_queue = mp.Queue()
-    for iCmd, cmd in enumerate(commands):
-        cmd_queue.put((iCmd+1, cmd))           
-    runningProcesses = [mp.Process(target=parallel_task_manager.Worker_RunCommand, args=(cmd_queue, options.nBlast, len(commands), True)) for i_ in range(options.nBlast)]
+    for iCmd, cmd in enumerate(commands, start=1):
+        cmd_queue.put((iCmd, cmd))
+
+    runningProcesses = [mp.Process(target=parallel_task_manager.Worker_RunCommand, 
+                        args=(cmd_queue, options.nBlast, len(commands), True)) for i_ in range(options.nBlast)]
+    
     for proc in runningProcesses:
         proc.start()#
+    
     for proc in runningProcesses:
         while proc.is_alive():
             proc.join()
+
     # remove BLAST databases
     util.PrintTime("Done all-versus-all sequence search")
     if options.search_program == "blast":
         for f in glob.glob(files.FileHandler.GetWorkingDirectory1_Read()[0] + "BlastDBSpecies*"):
             os.remove(f)
+
     if options.search_program == "mmseqs":
         for i in range(speciessInfoObj.nSpAll):
             for j in range(speciessInfoObj.nSpAll):
                 tmp_dir = "/tmp/tmpBlast%d_%d.txt" % (i,j)
+
                 if os.path.exists(tmp_dir):
                     try:
                         shutil.rmtree(tmp_dir)
@@ -1658,7 +1746,7 @@ def ProcessesNewFasta(fastaDir, q_dna, speciesInfoObj_prev = None, speciesToUse_
             print(f)
         print("OrthoFinder expects FASTA files to have one of the following extensions: %s" % (", ".join(fastaExtensions)))
     
-    question_code('What the usage of speciesToUse_prev_names?')
+    question('What the usage of speciesToUse_prev_names?')
     speciesToUse_prev_names = set(speciesToUse_prev_names)
     
     if len(originalFastaFilenames) + len(speciesToUse_prev_names) < 2:
@@ -1723,7 +1811,7 @@ def ProcessesNewFasta(fastaDir, q_dna, speciesInfoObj_prev = None, speciesToUse_
                     else:
                         line = line.upper()    # allow lowercase letters in sequences
 
-                        question_code('Why do we need this control?')
+                        question('Why do we need this control?')
                         if not qHasAA and (iLine < mLinesToCheck):
 #                            qHasAA = qHasAA or any([c in line for c in ['D','E','F','H','I','K','L','M','N','P','Q','R','S','V','W','Y']])
                             qHasAA = qHasAA or any([c in line for c in ['E','F','I','L','P','Q']]) # AAs minus nucleotide ambiguity codes
@@ -1742,7 +1830,7 @@ def ProcessesNewFasta(fastaDir, q_dna, speciesInfoObj_prev = None, speciesToUse_
         if not qOk:
             util.Fail()
 
-    question_code("This line seems be to unnecessary.")
+    question("This line seems be to unnecessary.")
     if len(originalFastaFilenames) > 0: outputFasta.close()
 
     speciesInfoObj.speciesToUse = speciesInfoObj.speciesToUse + newSpeciesIDs
@@ -1864,6 +1952,7 @@ def main(args=None):
             # 4
             seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
             # 5.
+            question("In which case speciesXMLInfoFN is not None?")
             if options.speciesXMLInfoFN:   
                 speciesXML = GetXMLSpeciesInfo(speciesInfoObj, options)
             # 6.    

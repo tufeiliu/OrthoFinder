@@ -34,7 +34,10 @@ import multiprocessing as mp
 try: 
     import queue
 except ImportError:
-    import Queue as queue     
+    import Queue as queue    
+
+from orthofinder.dev_tools.decorators import timeit
+from orthofinder.dev_tools.questions import question 
 
 # uncomment to get round problem with python multiprocessing library that can set all cpu affinities to a single cpu
 # This can cause use of only a limited number of cpus in other cases so it has been commented out
@@ -123,23 +126,29 @@ def ManageQueue(runningProcesses, cmd_queue):
 
 def RunCommand(command, qPrintOnError=False, qPrintStderr=True):
     """ Run a single command """
+
     if qPrintOnError:
         popen = subprocess.Popen(command, env=my_env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = popen.communicate()
+
         if popen.returncode != 0:
             print(("\nERROR: external program called by OrthoFinder returned an error code: %d" % popen.returncode))
             print(("\nCommand: %s" % command))
             print(("\nstdout\n------\n%s" % stdout))
             print(("stderr\n------\n%s" % stderr))
+
         elif qPrintStderr and len(stderr) > 0 and not stderr_exempt(stderr):
             print("\nWARNING: program called by OrthoFinder produced output to stderr")
             print(("\nCommand: %s" % command))
             print(("\nstdout\n------\n%s" % stdout))
             print(("stderr\n------\n%s" % stderr))
+
         return popen.returncode
+
     else:
         popen = subprocess.Popen(command, env=my_env, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         popen.communicate()
+
         return popen.returncode
 
 def RunOrderedCommandList(commandList):
@@ -171,9 +180,11 @@ def Worker_RunCommand(cmd_queue, nProcesses, nToDo, qPrintOnError=False, qPrintS
         try:
             i, command = cmd_queue.get(True, 1)
             nDone = i - nProcesses + 1
+
             if nDone >= 0 and divmod(nDone, 10 if nToDo <= 200 else 100 if nToDo <= 2000 else 1000)[1] == 0:
                 PrintTime("Done %d of %d" % (nDone, nToDo))
             RunCommand(command, qPrintOnError=qPrintOnError, qPrintStderr=qPrintStderr)
+        
         except queue.Empty:
             return   
 
@@ -226,20 +237,25 @@ def Worker_RunCommands_And_Move(cmd_and_filename_queue, nProcesses, nToDo, qList
         except:
             print("WARNING: Unknown caught unknown exception")
 
-                            
+question("Need more explantion for this function.")          
 def Worker_RunOrderedCommandList(cmd_queue, nProcesses, nToDo):
-    """ repeatedly takes items to process from the queue until it is empty at which point it returns. Does not take a new task
+    """ repeatedly takes items to process from the queue until 
+        it is empty at which point it returns. Does not take a new task
         if it can't acquire queueLock as this indicates the queue is being rearranged.
         
         Writes each commands output and stderr to a file
     """
+
     while True:
         try:
             i, commandSet = cmd_queue.get(True, 1)
             nDone = i - nProcesses + 1
+
             if nDone >= 0 and divmod(nDone, 10 if nToDo <= 200 else 100 if nToDo <= 2000 else 1000)[1] == 0:
                 PrintTime("Done %d of %d" % (nDone, nToDo))
+
             RunOrderedCommandList(commandSet)
+
         except queue.Empty:
             return   
         

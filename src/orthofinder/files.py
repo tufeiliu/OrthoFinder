@@ -42,6 +42,7 @@ import glob
 import time
 import shutil
 import datetime
+from typing import Optional
 
 from orthofinder import util
 
@@ -75,7 +76,8 @@ class __Files_new_dont_manually_create__(object):
      
     """ ========================================================================================== """
     # RefactorDS - FileHandler
-    def CreateOutputDirFromStart_new(self, fasta_dir, base, user_name = None, old_wd_base_list=None):
+    def CreateOutputDirFromStart_new(self, fasta_dir, base, user_name = None, 
+                                     old_wd_base_list=None, scorematrix=None):
         """
         The initial difference will be that results will go in OrthoFinder/Results_DATE or USER_SPECIFIED/RESULTS_DATE
         whereas before they went in Results_DATE or USER_SPECIFIED.
@@ -86,9 +88,10 @@ class __Files_new_dont_manually_create__(object):
           ones itself then there will be other items in the list.
         """
         if user_name == None:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_")
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_", scorematrix=scorematrix)
         else:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, qDate=False)
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, 
+                                                      qDate=False, scorematrix=scorematrix)
         self.wd_current = self.rd1 + "WorkingDirectory/"
         os.mkdir(self.wd_current)
         self.wd_base = [self.wd_current]        
@@ -157,10 +160,12 @@ class __Files_new_dont_manually_create__(object):
     def CreateOutputDirectories(self, options, previous_files_locator, base_dir, fastaDir=None):
         if options.qStartFromFasta and options.qStartFromBlast:
             wd1 = previous_files_locator.GetStartFromBlast()
-            self.CreateOutputDirFromStart_new(fastaDir, base_dir, user_name=options.name, old_wd_base_list = wd1)
+            self.CreateOutputDirFromStart_new(fastaDir, base_dir, user_name=options.name, 
+                                              old_wd_base_list = wd1, scorematrix=options.score_matrix)
         
         elif options.qStartFromFasta:
-            self.CreateOutputDirFromStart_new(fastaDir, base_dir, user_name=options.name)
+            self.CreateOutputDirFromStart_new(fastaDir, base_dir, user_name=options.name, 
+                                              scorematrix=options.score_matrix)
             
         elif options.qStartFromBlast: 
             wd1 = previous_files_locator.GetStartFromBlast()
@@ -295,6 +300,28 @@ class __Files_new_dont_manually_create__(object):
             fn = "%sSpecies%d.fa" % (d, iSpecies)
             if os.path.exists(fn): return fn
         raise Exception(fn + " not found")
+
+    def GetScoreMatrix(self, matrixid: Optional[str] = None):
+
+        diamond_sm_options = ["BLOSUM45", "BLOSUM50", 
+                              "BLOSUM62", "BLOSUM80",
+                              "BLOSUM90", "PAM250",
+                              "PAM70", "PAM30"]
+
+        
+        if not matrixid:
+            matrixid = "BLOSUM62"
+            return matrixid
+        elif matrixid.upper() in diamond_sm_options:
+            return matrixid.upper()
+
+        else:
+            # scoring_matrix_path = glob.glob(os.path.join(os.getcwd(), "scoring_matrix", "*.txt"))[0]
+            if os.path.isfile(matrixid):
+                return matrixid
+            else:
+                raise Exception("The scoring matrix file doesn't exist!")
+
         
     def GetSortedSpeciesFastaFiles(self):
         if len(self.wd_base) == 0: raise Exception("No wd1")

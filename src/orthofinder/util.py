@@ -62,20 +62,32 @@ Directory and file management
 -------------------------------------------------------------------------------
 """               
                
-def GetDirectoryName(baseDirName, i):
-    if i == 0:
-        return baseDirName + os.sep
+def GetDirectoryName(baseDirName, i, scorematrix):
+    if not scorematrix:
+        if i == 0:
+            return baseDirName + os.sep
+        else:
+            return baseDirName + ("_%d" % i) + os.sep
     else:
-        return baseDirName + ("_%d" % i) + os.sep
+        if os.path.isfile(scorematrix):
+            matrix_name = os.path.basename(scorematrix).split(".")[0]
+        else:
+            matrix_name = scorematrix
+
+        if i == 0:
+            return baseDirName + "_" + matrix_name + os.sep 
+        else:
+            return baseDirName + ("_%d" % i) + "_" + matrix_name + os.sep
+
 
 """Call GetNameForNewWorkingDirectory before a call to CreateNewWorkingDirectory to find out what directory will be created"""
-def CreateNewWorkingDirectory(baseDirectoryName, qDate=True):
+def CreateNewWorkingDirectory(baseDirectoryName, qDate=True, scorematrix=None):
     dateStr = datetime.date.today().strftime("%b%d") if qDate else ""
     iAppend = 0
-    newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, iAppend)
+    newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, iAppend, scorematrix)
     while os.path.exists(newDirectoryName):
         iAppend += 1
-        newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, iAppend)
+        newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, iAppend, scorematrix)
     os.mkdir(newDirectoryName)
     return newDirectoryName
     

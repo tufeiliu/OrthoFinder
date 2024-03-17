@@ -104,7 +104,11 @@ class Seq(object):
 # ==============================================================================================================================
         
 class OrthoGroupsSet(object):
-    def __init__(self, orthofinderWorkingDir_list, speciesToUse, nSpAll, qAddSpeciesToIDs, idExtractor = util.FirstWordExtractor):
+    def __init__(self, orthofinderWorkingDir_list, 
+                 speciesToUse, 
+                 nSpAll, 
+                 qAddSpeciesToIDs, 
+                 idExtractor = util.FirstWordExtractor):
         self.speciesIDsEx = util.FullAccession(files.FileHandler.GetSpeciesIDsFN())
         self._Spec_SeqIDs = None
         self._extractor = idExtractor
@@ -152,7 +156,17 @@ class OrthoGroupsSet(object):
                 return self.ogs_all
             else:
                 return self.ogs_all[:self.iOgs4]
-        ogs = MCL.GetPredictedOGs(files.FileHandler.GetClustersFN())     
+        
+        
+
+        ogs = MCL.GetPredictedOGs(files.FileHandler.GetClustersFN())  
+
+        # print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        # for og in ogs:
+        #     print(og)
+        #     for g in og:
+        #         print(g, Seq(g))
+        
         self.ogs_all = [[Seq(g) for g in og] for og in ogs]   
         self.iOgs4 = len(self.ogs_all) if len(self.ogs_all[-1]) >= 4 else next(i for i, og in enumerate(self.ogs_all) if len(og) < 4) 
         if qInclAll:
@@ -564,7 +578,10 @@ def WriteTestDistancesFile(testFN):
         outfile.write("4\n1_1 0 0 0.2 0.25\n0_2 0 0 0.21 0.28\n3_1 0.2 0.21 0 0\n4_1 0.25 0.28 0 0")
     return testFN
 
-def CanRunOrthologueDependencies(workingDir, qMSAGeneTrees, qPhyldog, qStopAfterTrees, msa_method, tree_method, recon_method, program_caller, qStopAfterAlignments):  
+def CanRunOrthologueDependencies(workingDir, qMSAGeneTrees, qPhyldog, qStopAfterTrees, 
+                                 msa_method, tree_method, recon_method, program_caller, 
+                                 qStopAfterAlignments): 
+
     d_deps_test = files.FileHandler.GetDependenciesCheckDir()
     # FastME
     if not qMSAGeneTrees:
@@ -578,13 +595,14 @@ def CanRunOrthologueDependencies(workingDir, qMSAGeneTrees, qPhyldog, qStopAfter
             program_caller.PrintDependencyCheckFailure(cmd)
             print("Please check FastME is installed and that the executables are in the system path.\n")
             return False
-            
+      
     # DLCPar
     if ("dlcpar" in recon_method) and not (qStopAfterTrees or qStopAfterAlignments):
         if not parallel_task_manager.CanRunCommand("dlcpar_search --version", qAllowStderr=False):
             print("ERROR: Cannot run dlcpar_search")
             print("Please check DLCpar is installed and that the executables are in the system path.\n")
             return False
+        
         if recon_method == "dlcpar_convergedsearch":
             capture = subprocess.Popen("dlcpar_search --version", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=my_env)
             stdout = [x for x in capture.stdout]
@@ -632,7 +650,7 @@ def CanRunOrthologueDependencies(workingDir, qMSAGeneTrees, qPhyldog, qStopAfter
                    program_caller.PrintDependencyCheckFailure(cmd)
                    print("Please check program is installed. If it is user-configured please check the configuration in the orthofinder/config.json file\n")
                    return False
-            
+      
     if qPhyldog:
         if not parallel_task_manager.CanRunCommand("mpirun -np 1 phyldog", qAllowStderr=False):
             print("ERROR: Cannot run mpirun -np 1 phyldog")
@@ -897,7 +915,10 @@ def OrthologuesFromTrees(
     Just infer orthologues from trees, don't do any of the preceeding steps.
     """
     speciesToUse, nSpAll, _ = util.GetSpeciesToUse(files.FileHandler.GetSpeciesIDsFN())    
-    ogSet = OrthoGroupsSet(files.FileHandler.GetWorkingDirectory1_Read(), speciesToUse, nSpAll, qAddSpeciesToIDs, idExtractor = util.FirstWordExtractor)
+    ogSet = OrthoGroupsSet(files.FileHandler.GetWorkingDirectory1_Read(), 
+                           speciesToUse, nSpAll, 
+                           qAddSpeciesToIDs, 
+                           idExtractor = util.FirstWordExtractor)
     if userSpeciesTree_fn != None:
         speciesDict = files.FileHandler.GetSpeciesDict()
         speciesToUseNames = [speciesDict[str(iSp)] for iSp in ogSet.speciesToUse]
@@ -944,7 +965,11 @@ def OrthologuesWorkflow(speciesToUse, nSpAll,
     Variables:
     - ogSet - all the relevant information about the orthogroups, species etc.
     """
-    ogSet = OrthoGroupsSet(files.FileHandler.GetWorkingDirectory1_Read(), speciesToUse, nSpAll, qAddSpeciesToIDs, idExtractor = util.FirstWordExtractor)
+    ogSet = OrthoGroupsSet(files.FileHandler.GetWorkingDirectory1_Read(), 
+                           speciesToUse, 
+                           nSpAll, 
+                           qAddSpeciesToIDs, 
+                           idExtractor = util.FirstWordExtractor)
     
     tree_generation_method = "msa" if qMSA or qPhyldog else "dendroblast"
     stop_after = "seqs" if qStopAfterSeqs else "align" if qStopAfterAlign else ""
