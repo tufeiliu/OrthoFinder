@@ -7,5 +7,7 @@ aaindex2.txt:Zone.Identifier
 orthogroups_compare.py
 orthogroups_compare/
 orthologues_compare/
+ExampleData/OrthoFinder/
+fungal_dataset/OrthoFinder/
 otest.py
 substitution_matrix/
