@@ -24,7 +24,7 @@ def plot_heatmap(symmetric_matrix, cols, gc="unassined", title=None):
         plt.title(f"Orthogroups intersection {gc} (%)", fontsize = 20)
     else:
         plt.title(f"Orthogroups: {title} (%)", fontsize = 20)
-    output_path = pathlib.Path.cwd() / "orthogroups_compare" / f"{gc}0.png"
+    output_path = pathlib.Path.cwd() / "chordata_orthogroups_compare" / f"{gc}0.png"
     plt.savefig(output_path)
     plt.close()
 
@@ -77,8 +77,8 @@ def compare_diff(left_sets, right_sets):
     return distinct_orthogroups, distinct_right, orthogroup_overlap, gen_intersection_dict
 
 
-orthofinder_outputs = pathlib.Path.cwd() / "ExampleData0" / "OrthoFinder"
-species_fasta = pathlib.Path.cwd() / "ExampleData0"
+orthofinder_outputs = pathlib.Path.cwd() / "Chordata" / "OrthoFinder"
+species_fasta = pathlib.Path.cwd() / "Chordata"
 species_gens = {file.name.split(".")[0]: {} for file in species_fasta.iterdir() if file.is_file() }
 
 orthogroup_file_dict = {}

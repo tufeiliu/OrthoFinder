@@ -10,7 +10,7 @@ if [ -d "$smdir" ]; then
 	for file in "$smdir"/*; do
 		if [ -f "$file" ]; then     
 				echo
-				custom_command="orthofinder -f ExampleData --custom-matrix $file -S diamond_custom --gapopen 10 --gapextend 3"
+				custom_command="orthofinder -f fungal_dataset --custom-matrix $file -S diamond_custom --gapopen 10 --gapextend 3"
 				echo ">>>>> Run commond $custom_command"
 				custom_result=$($custom_command)
 				echo 
