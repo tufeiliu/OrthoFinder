@@ -71,7 +71,6 @@ version_variable = "setup.py:__version__"
 where = ["src"]
 include = [
     "orthofinder",
-    "orthofinder.dev_tools"
 ]
 
 [tool.setuptools.package-data]
