@@ -31,8 +31,10 @@ import json
 import time
 import subprocess
 import multiprocessing as mp
-from orthofinder.dev_tools.decorators import timeit
-from orthofinder.dev_tools.questions import question
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from dev_tools.decorators import timeit
+from dev_tools.questions import question
 
 PY2 = sys.version_info <= (3,)
 from orthofinder import util, parallel_task_manager
@@ -315,7 +317,7 @@ class ProgramCaller(object):
                             replace("SCOREMATRIX", scorematrix).replace("BASENAME", basename).\
                             replace("PATH", path).replace("BASEOUTNAME", basename_out) 
 
-        print(outstring)
+        # print(outstring)
         if identifier != None:
             outstring = outstring.replace("IDENTIFIER", identifier)
             
@@ -387,12 +389,9 @@ class ProgramCaller(object):
                                                gapextend=gapextend)
             target_fn = outfilename_proposed
             actual_target_fn = (actual_fn, target_fn)
-        
-        # print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        # print((cmd, actual_target_fn))
+
         return cmd, actual_target_fn
     
-    question("What is the purpose of writing the following sequence into the Species0.fa file")
     def _WriteTestSequence(self, working_dir):
         fn = working_dir + "Species0.fa"
         with open(fn, 'w') as outfile:
@@ -406,7 +405,6 @@ MQITVKDLVHTFLAKTPYELNAIDNINVTIKQGEFVGVIGQTGSGKTTFIEHLNALLLPSAGSVEWVFEN
 MIKVTDLMFKYPSAQANAIEKLNLEIESGKYVAILGHNGSGKSTFSKLLVALYKPADGKIELDGTTISKE""")
         return fn
 
-    question("What is the purpose of writing the following sequence into the Species0.fa file")    
     def _WriteTestSequence_Longer(self, working_dir):
         fn = working_dir + "Species0.fa"
         with open(fn, 'w') as outfile:

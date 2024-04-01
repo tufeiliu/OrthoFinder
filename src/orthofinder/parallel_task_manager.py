@@ -36,8 +36,9 @@ try:
 except ImportError:
     import Queue as queue    
 
-from orthofinder.dev_tools.decorators import timeit
-from orthofinder.dev_tools.questions import question 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from dev_tools.decorators import timeit
+from dev_tools.questions import question 
 
 # uncomment to get round problem with python multiprocessing library that can set all cpu affinities to a single cpu
 # This can cause use of only a limited number of cpus in other cases so it has been commented out
@@ -236,8 +237,7 @@ def Worker_RunCommands_And_Move(cmd_and_filename_queue, nProcesses, nToDo, qList
                 q_print_first_traceback_0 = True
         except:
             print("WARNING: Unknown caught unknown exception")
-
-question("Need more explantion for this function.")          
+       
 def Worker_RunOrderedCommandList(cmd_queue, nProcesses, nToDo):
     """ repeatedly takes items to process from the queue until 
         it is empty at which point it returns. Does not take a new task

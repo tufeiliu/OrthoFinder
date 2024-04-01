@@ -28,17 +28,18 @@
 # first import parallel task manager to minimise RAM overhead for small processes
 from __future__ import absolute_import
 from orthofinder import parallel_task_manager
-
+import sys    
 import os                                       # Y
 os.environ["OPENBLAS_NUM_THREADS"] = "1"    # fix issue with numpy/openblas. Will mean that single threaded options aren't automatically parallelised 
 
-from orthofinder.dev_tools.decorators import timeit
-from orthofinder.dev_tools.questions import question
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from dev_tools.decorators import timeit
+from dev_tools.questions import question
 
 from orthofinder.parse_flags import get_example_data_dir, get_flag_name
 from orthofinder.version import __version__
 import importlib_resources
-import sys                                      # Y
+                                  # Y
 import subprocess                               # Y
 import glob                                     # Y
 import shutil                                   # Y
@@ -102,7 +103,7 @@ fastaExtensions = {"fa", "faa", "fasta", "fas", "pep"}
 my_env = os.environ.copy()
 # use orthofinder supplied executables by preference
 my_env['PATH'] = os.path.join(__location__, 'bin:') + my_env['PATH']
-
+print(os.path.join(__location__, 'bin:') + my_env['PATH'])
 # Fix LD_LIBRARY_PATH when using pyinstaller 
 if getattr(sys, 'frozen', False):
     if 'LD_LIBRARY_PATH_ORIG' in my_env: # Linux
@@ -865,7 +866,7 @@ def CanRunMCL():
         return False
     
 def GetProgramCaller():
-    
+
     config_file = os.path.join(__location__, 'configfiles/config.json') 
     pc = program_caller.ProgramCaller(config_file if os.path.exists(config_file) else None)
     config_file_user = os.path.expanduser("~/config_orthofinder_user.json")
@@ -1308,7 +1309,6 @@ def ProcessArgs(prog_caller, args):
     
     # set a default for number of algorithm threads
     if options.nProcessAlg is None:
-        question('Why 16 and 8?')
         options.nProcessAlg = min(16, max(1, int(options.nBlast/8)))
 
     if options.nBlast < 1:
@@ -1611,7 +1611,6 @@ def ProcessPreviousFiles(workingDir_list, qDoubleBlast):
 # 6
 def CreateSearchDatabases(seqsInfoObj, options, prog_caller):
     
-    question("Why not using speciesInfoObj.nSpAll?")
     nDB = max(seqsInfoObj.speciesToUse) + 1
 
     for iSp in range(nDB):
@@ -1639,7 +1638,6 @@ def RunSearch(options, speciessInfoObj, seqsInfo, prog_caller):
 
     name_to_print = "BLAST" if options.search_program == "blast" else options.search_program
     
-    question("Don't understand this option.")
     if options.qStopAfterPrepare:
         util.PrintUnderline("%s commands that must be run" % name_to_print)
 
@@ -1746,7 +1744,6 @@ def ProcessesNewFasta(fastaDir, q_dna, speciesInfoObj_prev = None, speciesToUse_
             print(f)
         print("OrthoFinder expects FASTA files to have one of the following extensions: %s" % (", ".join(fastaExtensions)))
     
-    question('What the usage of speciesToUse_prev_names?')
     speciesToUse_prev_names = set(speciesToUse_prev_names)
     
     if len(originalFastaFilenames) + len(speciesToUse_prev_names) < 2:
@@ -1811,7 +1808,6 @@ def ProcessesNewFasta(fastaDir, q_dna, speciesInfoObj_prev = None, speciesToUse_
                     else:
                         line = line.upper()    # allow lowercase letters in sequences
 
-                        question('Why do we need this control?')
                         if not qHasAA and (iLine < mLinesToCheck):
 #                            qHasAA = qHasAA or any([c in line for c in ['D','E','F','H','I','K','L','M','N','P','Q','R','S','V','W','Y']])
                             qHasAA = qHasAA or any([c in line for c in ['E','F','I','L','P','Q']]) # AAs minus nucleotide ambiguity codes
@@ -1830,7 +1826,6 @@ def ProcessesNewFasta(fastaDir, q_dna, speciesInfoObj_prev = None, speciesToUse_
         if not qOk:
             util.Fail()
 
-    question("This line seems be to unnecessary.")
     if len(originalFastaFilenames) > 0: outputFasta.close()
 
     speciesInfoObj.speciesToUse = speciesInfoObj.speciesToUse + newSpeciesIDs
@@ -1952,7 +1947,6 @@ def main(args=None):
             # 4
             seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
             # 5.
-            question("In which case speciesXMLInfoFN is not None?")
             if options.speciesXMLInfoFN:   
                 speciesXML = GetXMLSpeciesInfo(speciesInfoObj, options)
             # 6.    
