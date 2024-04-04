@@ -39,7 +39,9 @@ if __name__ == "__main__":
     #     # should be very small as we never try to create many processes
     #     mp.set_start_method('spawn')
 
-from orthofinder import parallel_task_manager
+from ..utils import parallel_task_manager, blast_file_processor, \
+    files, util, matrices, program_caller
+
 ptm_initialised = parallel_task_manager.ParallelTaskManager_singleton()
 
 import os                                       # Y
@@ -70,7 +72,7 @@ except ImportError:
     import Queue as queue                       # Y
 import warnings                                 # Y
 
-from orthofinder import blast_file_processor, files, mcl, util, matrices, orthologues, program_caller, trees_msa, \
+from orthofinder import mcl, orthologues, trees_msa, \
     split_ortholog_files, gathering, astral, trees2ologs_of, tree
 from orthofinder import accelerate as acc
 
@@ -78,8 +80,10 @@ from orthofinder import accelerate as acc
 if getattr(sys, 'frozen', False):
     __location__ = os.path.split(sys.executable)[0]
 else:
-    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-    
+    __location__ = os.path.realpath(os.path.join(os.getcwd(), 
+                                    os.path.dirname(os.path.dirname(__file__))))
+
+configfile_location = os.path.join(__location__, "run")  
 max_int = sys.maxsize
 ok = False
 while not ok:
@@ -258,7 +262,7 @@ def CanRunASTRAL():
         return False
     
 def GetProgramCaller():
-    config_file = os.path.join(__location__, 'config.json') 
+    config_file = os.path.join(configfile_location, 'config.json') 
     pc = program_caller.ProgramCaller(config_file if os.path.exists(config_file) else None)
     config_file_user = os.path.expanduser("~/config_orthofinder_user.json")
     if os.path.exists(config_file_user):
