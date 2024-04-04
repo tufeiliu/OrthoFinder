@@ -74,6 +74,7 @@ include = [
 
 [tool.setuptools.package-data]
 "orthofinder.bin" = ["*"]
+"orthofinder.bin.mafft.bin" = ["*"]
 "orthofinder.run" = ["*.json"]
 "ExampleData" = ["*"]
 
