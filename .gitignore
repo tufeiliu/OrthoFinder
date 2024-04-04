@@ -1,2 +1,7 @@
 .venv/
 scripts_of/__pycache__/
+ExampleData/OrthoFinder/
+src/orthofinder.egg-info/
+src/orthofinder/__pycache__/
+output
+src/orthofinder/run/__pycache__/
