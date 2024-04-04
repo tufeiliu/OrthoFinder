@@ -1,5 +1,6 @@
 from setuptools import setup
 
+setup()
 # exec(open('src/orthofinder/version.py').read())
 # setup(version = __version__)
 
