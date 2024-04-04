@@ -5,3 +5,4 @@ src/orthofinder.egg-info/
 src/orthofinder/__pycache__/
 output
 src/orthofinder/run/__pycache__/
+.coverage
