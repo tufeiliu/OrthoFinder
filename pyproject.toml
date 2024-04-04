@@ -9,7 +9,7 @@ authors = [
 ]
 description = "Phylogenetic orthology inference for comparative genomics"
 readme = "README.md"
-dynamic = ["version"]
+version= "2.5.5"
 requires-python = ">=2.7"
 keywords = [
     "comparative genomics",
@@ -40,7 +40,6 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
-    "importlib_resources",
     "scipy"
 ]
 
@@ -65,7 +64,7 @@ dependencies = [
     convert_orthofinder_tree_ids = "tools.convert_orthofinder_tree_ids:main"
 
 [tool.semantic_release]
-version_variable = "setup.py:__version__"
+version_variable = "pyproject.toml:version"
 
 [tool.setuptools.packages.find]
 where = ["src"]
