@@ -235,9 +235,7 @@ def get_arr_division(numerator_arr, denominator_arr):
         
 def gen_sets_analysis(matrices, gens_matrix_sets):
 
-    intersection_list0 = []
-    left_diff_list0 = []
-    right_diff_list0 = []
+    comparison_stats = {}
 
     for i in range(len(matrices)):
         left_set = gens_matrix_sets[matrices[i]]
@@ -256,34 +254,13 @@ def gen_sets_analysis(matrices, gens_matrix_sets):
             intersection_num = len(intersection)
             left_diff_num = len(left_diff)
             right_diff_num = len(right_diff)
+
+            comparison_stats["intersection"] = intersection_num
+            comparison_stats["left_diff"] = left_diff_num
+            comparison_stats["right_diff"] = right_diff_num
+            comparison_stats["labels"] = (matrices[i], matrices[j])
             
-            intersection_list1.append(intersection_num)
-            left_diff_list1.append(left_diff_num)
-            right_diff_list1.append(right_diff_num)
-
-        while len(intersection_list1) < len(matrices):
-            intersection_list1.appendleft(0)
-        
-        while len(left_diff_list1) < len(matrices):
-            left_diff_list1.appendleft(0)
-        
-        while len(right_diff_list1) < len(matrices):
-            right_diff_list1.appendleft(0)
-  
-
-        intersection_list0.append(np.array(intersection_list1))
-        left_diff_list0.append(np.array(left_diff_list1))
-        right_diff_list0.append(np.array(right_diff_list1))
-
-    intersection_arr = create_symmetric_matrix(intersection_list0)
-    left_diff_arr = create_symmetric_matrix(left_diff_list0)
-    right_diff_arr = create_symmetric_matrix(right_diff_list0)
-
-    intersection_left = get_arr_division(intersection_arr, left_diff_arr)
-    intersection_right = get_arr_division(intersection_arr, right_diff_arr)
-    intersection_union = get_arr_division(intersection_arr, intersection_arr + left_diff_arr + right_diff_arr)
-        
-    return intersection_left, intersection_right, intersection_union
+    return comparison_stats
 
 def sort_output(output_dict, ordered_matrix):
         
@@ -305,10 +282,6 @@ def create_ndarray(ordered_output_dict, matrices):
     return val_arr
 
 def orthogroups_analysis(datadir):
-
-    print()
-    print("--------------------------- Orthgroups -------------------------------")
-    print()
 
     orthogroup_file_dict, _, _ = obtain_ogs_datafiles(datadir)
     orthogroup_file_dict_orig, _, _ = obtain_ogs_datafiles("benchmark")
@@ -354,25 +327,23 @@ def orthogroups_analysis(datadir):
 
 
 def unassigned_gens_analysis(datadir):    
-
-    print()
-    print("--------------------- Unassigned gens -------------------------------")
-    print()
     
     _, unassigned_gens_file_dict, _ = obtain_ogs_datafiles(datadir)
+    _, unassigned_gens_file_dict_orig, _ = obtain_ogs_datafiles("benchmark")
+    unassigned_gens_file_dict.update(unassigned_gens_file_dict_orig)
+
     unassgined_gens_matrix_sets = create_unassgined_gens_matrix_sets(unassigned_gens_file_dict)
     matrices = [*unassgined_gens_matrix_sets.keys()]
-    unassigned_intersection_left, unassigned_intersection_right, \
-    unassigned_intersection_union = gen_sets_analysis(matrices, unassgined_gens_matrix_sets)
-    
+    comparison_stats = gen_sets_analysis(matrices, unassgined_gens_matrix_sets)
+    return comparison_stats
+
 
 def orthologues_analysis(datadir):
 
-
-    print()
-    print("--------------------- Orthologues -------------------------------")
-    print()
     _, _, orthologue_file_dict = obtain_ogs_datafiles(datadir)
+    _, _, orthologue_file_dict_orig = obtain_ogs_datafiles("benchmark")
+    orthologue_file_dict.update(orthologue_file_dict_orig)
+
     items3 = []
     for matrix, files in orthologue_file_dict.items():
         if len(files) != 0:
@@ -392,15 +363,15 @@ def orthologues_analysis(datadir):
                 orthologue_sets_dict[items3[i][0]] = set()
 
     matrices = [*orthologue_sets_dict.keys()]
+    comparison_stats = gen_sets_analysis(matrices, orthologue_sets_dict)
 
-    orthologue_intersection_left, orthologue_intersection_right, \
-    orthologue_intersection_union = gen_sets_analysis(matrices, orthologue_sets_dict)
+    return comparison_stats
  
 
 if __name__ == "__main__":
     
     args = sys.argv[1:]
-    datadir = "ExampleData0" if len(args) == 0 else args[-1]    
-    comparison_stats = orthogroups_analysis(datadir)
-    # unassigned_gens_analysis(datadir)
-    # orthologues_analysis(datadir)
+    datadir = "ExampleData" if len(args) == 0 else args[-1]    
+    orthogroups_comparison_stats = orthogroups_analysis(datadir)
+    unassigned_gens_comparison_stats = unassigned_gens_analysis(datadir)
+    orthologues_comparison_stats = orthologues_analysis(datadir)
