@@ -6,3 +6,9 @@ src/orthofinder/__pycache__/
 benchmark/
 src/orthofinder/run/__pycache__/
 .coverage
+src/orthofinder/comparative_genomics/__pycache__/
+src/orthofinder/gen_tree_inference/__pycache__/
+src/orthofinder/orthogroups/__pycache__/
+src/orthofinder/tools/__pycache__/
+src/orthofinder/utils/__pycache__/fasta_writer.cpython-310.pyc
+src/orthofinder/utils/__pycache__/split_ortholog_files.cpython-310.pyc
