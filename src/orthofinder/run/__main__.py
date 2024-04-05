@@ -97,7 +97,7 @@ while not ok:
         max_int = int(max_int/10)
 sys.setrecursionlimit(10**6)
     
-fastaExtensions = {"fa", "faa", "fasta", "fas", "pep"}
+
 # uncomment to get round problem with python multiprocessing library that can set all cpu affinities to a single cpu
 # This can cause use of only a limited number of cpus in other cases so it has been commented out
 # if sys.platform.startswith("linux"):
@@ -659,97 +659,6 @@ def clade_specific_orthogroups_v1(speciesInfoObj, seqsInfo, options, prog_caller
 def GetOrthologues_FromTrees(options):
     orthologues.OrthologuesFromTrees(options.recon_method, options.nBlast, options.nProcessAlg, options.speciesTreeFN,
                                      options.qAddSpeciesToIDs, options.qSplitParaClades, options.fewer_open_files)
- 
-# def ProcessesNewFasta(fastaDir, q_dna, speciesInfoObj_prev = None, speciesToUse_prev_names=[]):
-#     """
-#     Process fasta files and return a Directory object with all paths completed.
-#     """
-#     # Check files present
-#     qOk = True
-#     if not os.path.exists(fastaDir):
-#         print("\nDirectory does not exist: %s" % fastaDir)
-#         util.Fail()
-#     files_in_directory = sorted([f for f in os.listdir(fastaDir) if os.path.isfile(os.path.join(fastaDir,f))])
-#     originalFastaFilenames = []
-#     excludedFiles = []
-#     for f in files_in_directory:
-#         if len(f.rsplit(".", 1)) == 2 and f.rsplit(".", 1)[1].lower() in fastaExtensions and not f.startswith("._"):
-#             originalFastaFilenames.append(f)
-#         else:
-#             excludedFiles.append(f)
-#     if len(excludedFiles) != 0:
-#         print("\nWARNING: Files have been ignored as they don't appear to be FASTA files:")
-#         for f in excludedFiles:
-#             print(f)
-#         print("OrthoFinder expects FASTA files to have one of the following extensions: %s" % (", ".join(fastaExtensions)))
-#     speciesToUse_prev_names = set(speciesToUse_prev_names)
-#     if len(originalFastaFilenames) + len(speciesToUse_prev_names) < 2:
-#         print("ERROR: At least two species are required")
-#         util.Fail()
-#     if any([fn in speciesToUse_prev_names for fn in originalFastaFilenames]):
-#         print("ERROR: Attempted to add a second copy of a previously included species:")
-#         for fn in originalFastaFilenames:
-#             if fn in speciesToUse_prev_names: print(fn)
-#         print("")
-#         util.Fail()
-#     if len(originalFastaFilenames) == 0:
-#         print("\nNo fasta files found in supplied directory: %s" % fastaDir)
-#         util.Fail()
-#     if speciesInfoObj_prev == None:
-#         # Then this is a new, clean analysis 
-#         speciesInfoObj = util.SpeciesInfo()
-#     else:
-#         speciesInfoObj = speciesInfoObj_prev
-#     iSeq = 0
-#     iSpecies = 0
-#     # If it's a previous analysis:
-#     if len(speciesToUse_prev_names) != 0:
-#         with open(files.FileHandler.GetSpeciesIDsFN(), 'r') as infile:
-#             for line in infile: pass
-#         if line.startswith("#"): line = line[1:]
-#         iSpecies = int(line.split(":")[0]) + 1
-#     speciesInfoObj.iFirstNewSpecies = iSpecies
-#     newSpeciesIDs = []
-#     with open(files.FileHandler.GetSequenceIDsFN(), 'a') as idsFile, open(files.FileHandler.GetSpeciesIDsFN(), 'a') as speciesFile:
-#         for fastaFilename in originalFastaFilenames:
-#             newSpeciesIDs.append(iSpecies)
-#             outputFasta = open(files.FileHandler.GetSpeciesFastaFN(iSpecies, qForCreation=True), 'w')
-#             fastaFilename = fastaFilename.rstrip()
-#             speciesFile.write("%d: %s\n" % (iSpecies, fastaFilename))
-#             baseFilename, extension = os.path.splitext(fastaFilename)
-#             mLinesToCheck = 100
-#             qHasAA = False
-#             with open(fastaDir + os.sep + fastaFilename, 'r') as fastaFile:
-#                 for iLine, line in enumerate(fastaFile):
-#                     if line.isspace(): continue
-#                     if len(line) > 0 and line[0] == ">":
-#                         newID = "%d_%d" % (iSpecies, iSeq)
-#                         acc = line[1:].rstrip()
-#                         if len(acc) == 0:
-#                             print("ERROR: %s contains a blank accession line on line %d" % (fastaDir + os.sep + fastaFilename, iLine+1))
-#                             util.Fail()
-#                         idsFile.write("%s: %s\n" % (newID, acc))
-#                         outputFasta.write(">%s\n" % newID)    
-#                         iSeq += 1
-#                     else:
-#                         line = line.upper()    # allow lowercase letters in sequences
-#                         if not qHasAA and (iLine < mLinesToCheck):
-# #                            qHasAA = qHasAA or any([c in line for c in ['D','E','F','H','I','K','L','M','N','P','Q','R','S','V','W','Y']])
-#                             qHasAA = qHasAA or any([c in line for c in ['E','F','I','L','P','Q']]) # AAs minus nucleotide ambiguity codes
-#                         outputFasta.write(line)
-#                 outputFasta.write("\n")
-#             if (not qHasAA) and (not q_dna):
-#                 qOk = False
-#                 print("ERROR: %s appears to contain nucleotide sequences instead of amino acid sequences. Use '-d' option" % fastaFilename)
-#             iSpecies += 1
-#             iSeq = 0
-#             outputFasta.close()
-#         if not qOk:
-#             util.Fail()
-#     if len(originalFastaFilenames) > 0: outputFasta.close()
-#     speciesInfoObj.speciesToUse = speciesInfoObj.speciesToUse + newSpeciesIDs
-#     speciesInfoObj.nSpAll = max(speciesInfoObj.speciesToUse) + 1      # will be one of the new species
-#     return speciesInfoObj
 
 def DeleteDirectoryTree(d):
     if os.path.exists(d): 
@@ -759,53 +668,6 @@ def DeleteDirectoryTree(d):
             time.sleep(1)
             shutil.rmtree(d, True)   
 
-def CheckOptions(options, speciesToUse):
-    """Check any optional arguments are valid once we know what species are in the analysis
-    - user supplied species tree
-    """
-    if options.speciesTreeFN:
-        expSpecies = list(SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN()).values())
-        orthologues.CheckUserSpeciesTree(options.speciesTreeFN, expSpecies)
-
-    # check can open enough files
-    n_extra = 50
-    q_do_orthologs = not any((options.qStopAfterPrepare, options.qStopAfterGroups, options.qStopAfterSeqs, options.qStopAfterAlignments, options.qStopAfterTrees))
-    if q_do_orthologs:
-        n_sp = len(speciesToUse)
-        wd = files.FileHandler.GetWorkingDirectory_Write()
-        wd_files_test = wd + "Files_test/"
-        fh = []
-        try:
-            if not os.path.exists(wd_files_test):
-                os.mkdir(wd_files_test)
-            for i_sp in range(n_sp):
-                di = wd_files_test + "Sp%d/" % i_sp
-                if not os.path.exists(di):
-                    os.mkdir(di)
-                for j_sp in range(1):  # We only create a linear number of ortholog files now
-                    fnij = di + "Sp%d.txt" % j_sp
-                    fh.append(open(fnij, 'w'))
-            # create a few extra files to be safe
-            for i_extra in range(n_extra):
-                fh.append(open(wd_files_test + "Extra%d.txt" % i_extra, 'w'))
-            # close the files again and delete
-            for fhh in fh:
-                fhh.close()
-            DeleteDirectoryTree(wd_files_test)
-        except IOError as e:
-            if str(e).startswith("[Errno 24] Too many open files"):
-                util.number_open_files_exception_advice(len(speciesToUse), False)
-                for fhh in fh:
-                    fhh.close()
-                DeleteDirectoryTree(wd_files_test)
-                util.Fail()
-            else:
-                for fhh in fh:
-                    fhh.close()
-                DeleteDirectoryTree(wd_files_test)
-                print("ERROR: Attempted to open required files for OrthoFinder run but an unexpected error occurred. \n\nStacktrace:")
-                raise
-    return options
 
 def main(args=None):    
     try:
@@ -832,7 +694,7 @@ def main(args=None):
             # 3. 
             speciesInfoObj = fasta_processor.ProcessesNewFasta(fastaDir, options.dna, speciesInfoObj, speciesToUse_names)
             files.FileHandler.LogSpecies()
-            options = CheckOptions(options, speciesInfoObj.speciesToUse)
+            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
             # 4.
             seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
             # 5.
@@ -854,7 +716,7 @@ def main(args=None):
             speciesInfoObj = None
             speciesInfoObj = fasta_processor.ProcessesNewFasta(fastaDir, options.dna)
             files.FileHandler.LogSpecies()
-            options = CheckOptions(options, speciesInfoObj.speciesToUse)
+            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
             # 4
             seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
             # 5.
@@ -876,7 +738,7 @@ def main(args=None):
             speciesInfoObj, _ = ProcessPreviousFiles(files.FileHandler.GetWorkingDirectory1_Read(), options.qDoubleBlast)
             files.FileHandler.LogSpecies()
             print("Using previously calculated BLAST results in %s" % (files.FileHandler.GetWorkingDirectory1_Read()[0]))
-            options = CheckOptions(options, speciesInfoObj.speciesToUse)
+            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
             # 4.
             seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
             # 5.
@@ -893,14 +755,14 @@ def main(args=None):
             check_blast = not options.qMSATrees
             speciesInfoObj, _ = ProcessPreviousFiles(continuationDir, options.qDoubleBlast, check_blast=check_blast)
             files.FileHandler.LogSpecies()
-            options = CheckOptions(options, speciesInfoObj.speciesToUse)
+            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
             # 9
             GetOrthologues(speciesInfoObj, options, prog_caller)
 
         elif options.qStartFromTrees:
             speciesInfoObj, _ = ProcessPreviousFiles(files.FileHandler.GetWorkingDirectory1_Read(), options.qDoubleBlast, check_blast=False)
             files.FileHandler.LogSpecies()
-            options = CheckOptions(options, speciesInfoObj.speciesToUse)
+            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
             GetOrthologues_FromTrees(options)
 
         elif options.qFastAdd:
@@ -915,7 +777,7 @@ def main(args=None):
             print("\nAdding new species in %s to existing analysis in %s" % (fastaDir, continuationDir))
             speciesInfoObj = fasta_processor.ProcessesNewFasta(fastaDir, options.dna, speciesInfoObj, speciesToUse_names)
 
-            options = CheckOptions(options, speciesInfoObj.speciesToUse)
+            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
             seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
             # Add genes to orthogroups
             results_files = acc.RunSearch(options, speciesInfoObj, fn_diamond_db, prog_caller)
