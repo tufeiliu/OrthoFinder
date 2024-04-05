@@ -40,7 +40,7 @@ if __name__ == "__main__":
     #     mp.set_start_method('spawn')
 
 from ..utils import parallel_task_manager, blast_file_processor, \
-    files, util, matrices, program_caller
+    files, util, matrices, program_caller, split_ortholog_files
 
 ptm_initialised = parallel_task_manager.ParallelTaskManager_singleton()
 
@@ -72,9 +72,15 @@ except ImportError:
     import Queue as queue                       # Y
 import warnings                                 # Y
 
-from orthofinder import mcl, orthologues, trees_msa, \
-    split_ortholog_files, gathering, astral, trees2ologs_of, tree
-from orthofinder import accelerate as acc
+from ..orthogroups import gathering
+from ..orthogroups import accelerate as acc
+
+from ..tools import astral, tree, mcl
+from ..gen_tree_inference import trees2ologs_of, orthologues, trees_msa
+
+# from orthofinder import mcl, orthologues, trees_msa, \
+#     gathering, astral, trees2ologs_of, tree
+
 
 # Get directory containing script/bundle
 if getattr(sys, 'frozen', False):

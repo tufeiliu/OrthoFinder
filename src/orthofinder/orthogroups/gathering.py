@@ -16,8 +16,10 @@ try:
 except ImportError:
     import Queue as queue
 
-from . import mcl, orthologues, trees_msa, stats
-from .utils import util, files, blast_file_processor, matrices, parallel_task_manager
+from ..tools import mcl
+from ..gen_tree_inference import orthologues, trees_msa
+from ..comparative_genomics import stats
+from ..utils import util, files, blast_file_processor, matrices, parallel_task_manager
 
 def WriteGraph_perSpecies(args):
     seqsInfo, graphFN, iSpec, d_pickle = args

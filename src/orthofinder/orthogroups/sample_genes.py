@@ -16,8 +16,7 @@ from sklearn import cluster
 import numpy as np
 from Bio import AlignIO
 
-from . import fasta_writer
-from .utils import util
+from ..utils import util, fasta_writer
 
 use_n_auto = util.version_parse_simple(sklearn.__version__) >= util.version_parse_simple('1.2.0')
 

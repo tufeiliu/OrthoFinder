@@ -40,18 +40,14 @@ try:
 except ImportError:
     import Queue as queue
 
-from . import tree
-from . import mcl as MCL
-from . import stride
-from . import trees2ologs_dlcpar
-from . import trees2ologs_of
-from .utils import blast_file_processor as BlastFileProcessor
-from . import trees_msa
-from . import wrapper_phyldog
-from . import stag
-from .utils import util, files, parallel_task_manager, program_caller
-from . import accelerate
-from . import stats
+from ..tools import tree, wrapper_phyldog, stag, stride
+from ..tools import mcl as MCL
+from . import trees2ologs_dlcpar, trees2ologs_of, trees_msa
+from ..utils import blast_file_processor as BlastFileProcessor
+
+from ..utils import util, files, parallel_task_manager, program_caller
+from ..orthogroups import accelerate
+from ..comparative_genomics import stats
 
 nThreads = util.nThreadsDefault
 

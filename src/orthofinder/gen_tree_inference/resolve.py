@@ -16,8 +16,8 @@ try:
 except ImportError:
     import Queue as queue
 
-from . import tree as tree_lib
-from .utils import util, parallel_task_manager
+from ..tools import tree as tree_lib
+from ..utils import util, parallel_task_manager
     
 def DetachAndCleanup(top, n):
     """

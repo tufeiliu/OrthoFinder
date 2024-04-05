@@ -40,7 +40,7 @@ from collections import namedtuple
 
 nThreadsDefault = mp.cpu_count()
 
-from orthofinder import tree
+from ..tools import tree
 from . import parallel_task_manager
 
 PY2 = sys.version_info <= (3,)

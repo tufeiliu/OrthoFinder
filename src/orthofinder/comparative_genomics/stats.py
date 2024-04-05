@@ -7,7 +7,7 @@ import datetime
 import numpy as np
 from collections import Counter
 
-from .utils import util, files
+from ..utils import util, files
 
 
 def OrthogroupsMatrix(iSpecies, properOGs):

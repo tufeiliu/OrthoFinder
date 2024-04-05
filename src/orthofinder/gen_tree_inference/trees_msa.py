@@ -35,9 +35,9 @@ import glob
 import numpy as np
 from collections import Counter, defaultdict
 
-from .utils import util, program_caller as pc
-from .utils import files
-from . import trim
+from ..utils import util, program_caller as pc
+from ..utils import files
+from ..tools import trim
 
 class FastaWriter(object):
     def __init__(self, fastaFileDir_list, speciesToUse):

@@ -36,8 +36,7 @@ import itertools
 import multiprocessing as mp
 from collections import Counter, defaultdict
 
-from . import probroot
-from . import tree 
+from . import probroot, tree 
 
 PY2 = sys.version_info <= (3,)
 csv_write_mode = 'wb' if PY2 else 'wt'

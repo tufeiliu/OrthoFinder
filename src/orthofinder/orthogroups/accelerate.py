@@ -7,11 +7,12 @@ import random
 from collections import defaultdict
 from typing import Optional
 import multiprocessing as mp
-
 import numpy as np
 
-from . import  mcl, orthologues, sample_genes, fasta_writer, tree
-from .utils import util, files, parallel_task_manager, program_caller
+from ..gen_tree_inference import orthologues
+from . import sample_genes
+from ..tools import mcl, tree
+from ..utils import util, files, parallel_task_manager, program_caller, fasta_writer
 
 
 class XcelerateConfig(object):

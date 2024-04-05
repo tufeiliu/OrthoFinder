@@ -31,7 +31,7 @@ import numpy as np
 from itertools import combinations
 
 from . import tree, newick
-from .utils import util, parallel_task_manager
+from ..utils import util, parallel_task_manager
 from . import consensus_tree as cons
 
 # import tree, newick, util, parallel_task_manager

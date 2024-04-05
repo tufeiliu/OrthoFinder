@@ -19,9 +19,9 @@ import itertools
 import multiprocessing as mp
 from collections import defaultdict, deque
 
-from . import tree as tree_lib
+from ..tools import tree as tree_lib
 from . import resolve
-from .utils import util, files, parallel_task_manager
+from ..utils import util, files, parallel_task_manager
 try: 
     import queue
 except ImportError:

@@ -38,8 +38,8 @@ except ImportError:
 from scipy import sparse
 from collections import defaultdict
 
-from . import tree
-from .utils import util, files, program_caller
+from ..tools import tree
+from ..utils import util, files, program_caller
 
 def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(_nsre, s)]

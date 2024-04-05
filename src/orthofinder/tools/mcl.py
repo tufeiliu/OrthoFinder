@@ -28,7 +28,7 @@ import sys
 import csv
 from typing import List, Set
 
-from .utils import parallel_task_manager, util, files
+from ..utils import parallel_task_manager, util, files
 
 from collections import defaultdict, Counter
 import xml.etree.ElementTree as ET              # Y
