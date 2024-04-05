@@ -6,3 +6,5 @@ tox
 delayed-assert
 seaborn
 pandas
+flake8
+pylint
