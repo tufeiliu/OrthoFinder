@@ -16,8 +16,8 @@ try:
 except ImportError:
     import Queue as queue
 
-from ..tools import mcl
-from ..gen_tree_inference import orthologues, trees_msa
+from ..tools import mcl, trees_msa
+from . import orthogroups_set
 from ..comparative_genomics import stats
 from ..utils import util, files, blast_file_processor, matrices, parallel_task_manager
 
@@ -543,7 +543,7 @@ def post_clustering_orthogroups(clustersFilename_pairs, speciesInfoObj, seqsInfo
         mcl.MCL.CreateOrthogroupTable(ogs, idsDict, speciesNamesDict, speciesInfoObj.speciesToUse, resultsBaseFilename)
 
     # Write Orthogroup FASTA files
-    ogSet = orthologues.OrthoGroupsSet(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse,
+    ogSet = orthogroups_set.OrthoGroupsSet(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse,
                                        speciesInfoObj.nSpAll, options.qAddSpeciesToIDs,
                                        idExtractor=util.FirstWordExtractor)
     treeGen = trees_msa.TreesForOrthogroups(None, None, None)

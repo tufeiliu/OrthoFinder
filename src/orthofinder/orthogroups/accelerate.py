@@ -9,11 +9,10 @@ from typing import Optional
 import multiprocessing as mp
 import numpy as np
 
-from ..gen_tree_inference import orthologues
 from . import sample_genes
 from ..tools import mcl, tree
-from ..utils import util, files, parallel_task_manager, program_caller, fasta_writer
-
+from ..utils import util, files, parallel_task_manager, program_caller, fasta_processor
+from . import orthogroups_set
 
 class XcelerateConfig(object):
     def __init__(self):
@@ -220,7 +219,7 @@ def create_profiles_database(din, wd_list, nSpAll, selection="kmeans", n_for_pro
     if os.path.exists(fn_diamond_db):
         print("Profiles database already exists and will be reused: %s" % fn_diamond_db)
         return fn_diamond_db, q_hogs
-    og_set = orthologues.OrthoGroupsSet(wd_list, list(range(nSpAll)), nSpAll, True)
+    og_set = orthogroups_set.OrthoGroupsSet(wd_list, list(range(nSpAll)), nSpAll, True)
     ids = og_set.Spec_SeqDict()
     ids_rev = {v: k for k, v in ids.items()}
     if q_hogs:
@@ -239,7 +238,7 @@ def create_profiles_database(din, wd_list, nSpAll, selection="kmeans", n_for_pro
             print("ERROR: Can't find %s" % wd + "clusters_OrthoFinder*id_pairs.txt")
         ogs = mcl.GetPredictedOGs(clusters_filename[0])
         fn_fasta = fn_fasta[:-7] + ".fa"
-    fw = fasta_writer.FastaWriter(wd + "Species*fa", qGlob=True)
+    fw = fasta_processor.FastaWriter(wd + "Species*fa", qGlob=True)
     seq_write = []
     seq_convert = dict()
     # print("WARNING: Check all gene names, can't start with '__'")
@@ -264,7 +263,7 @@ def create_profiles_database(din, wd_list, nSpAll, selection="kmeans", n_for_pro
                 print("File does not exist, skipping: %s" % fn)
                 continue
             i_part = os.path.basename(fn).rsplit(".", 2)[1] if q_subtrees else None
-            fw_temp = fasta_writer.FastaWriter(fn)
+            fw_temp = fasta_processor.FastaWriter(fn)
             n_in_og = len(fw_temp.SeqLists)
             n_for_profile = min(n_in_og, n_for_profile)
             if selection == "kmeans" and len(fw_temp.SeqLists) > n_for_profile:
@@ -281,11 +280,11 @@ def create_profiles_database(din, wd_list, nSpAll, selection="kmeans", n_for_pro
                     os.remove(fn_temp)
             elif selection == "kmeans" or selection == "random":
                 if q_subtrees:
-                    fw_temp = fasta_writer.FastaWriter(fn)
+                    fw_temp = fasta_processor.FastaWriter(fn)
                     og = [g for g in fw_temp.SeqLists if not g.startswith("SHOOTOUTGROUP_")]
                 s = sample_random(og, n_for_profile)
             else:
-                s = [g for g in fasta_writer.FastaWriter(fn).SeqLists.keys() if not g.startswith("SHOOTOUTGROUP_")]
+                s = [g for g in fasta_processor.FastaWriter(fn).SeqLists.keys() if not g.startswith("SHOOTOUTGROUP_")]
             if q_ids and q_subtrees:
                 s = [ids_rev[ss] for ss in s]
             if q_subtrees:
@@ -343,7 +342,7 @@ def write_unassigned_fasta(ogs_orig_list, ogs_new_genes, speciesInfoObj):
     # for iSp in iSpeciesNew:
     n_unassigned = []
     for iSp in range(speciesInfoObj.nSpAll):
-        fw = fasta_writer.FastaWriter(files.FileHandler.GetSpeciesFastaFN(iSp))
+        fw = fasta_processor.FastaWriter(files.FileHandler.GetSpeciesFastaFN(iSp))
         unassigned = set(fw.SeqLists.keys()).difference(assigned_genes)
         n_unassigned.append(len(unassigned))
         fw.WriteSeqsToFasta(unassigned, files.FileHandler.GetSpeciesUnassignedFastaFN(iSp, qForCreation=True))

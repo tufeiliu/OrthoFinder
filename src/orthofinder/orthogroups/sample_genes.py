@@ -16,7 +16,7 @@ from sklearn import cluster
 import numpy as np
 from Bio import AlignIO
 
-from ..utils import util, fasta_writer
+from ..utils import util, fasta_processor
 
 use_n_auto = util.version_parse_simple(sklearn.__version__) >= util.version_parse_simple('1.2.0')
 
@@ -98,7 +98,7 @@ def select_from_unaligned(infn, k, n, nmax=50000):
         seq_dict - dictionary: acc -> sequence of the selected sequences
         FastaWriter - The FastaWriter for all sequences in input file
     """
-    fw = fasta_writer.FastaWriter(infn)
+    fw = fasta_processor.FastaWriter(infn)
     print("Read sequences")
     accs = list(fw.SeqLists.keys())    # ordered list for the sequences
     if len(accs) > nmax:
@@ -265,7 +265,7 @@ def select_from_aligned(infn, n_sample, q_trim=True):
     # print(cluster_representative)
     selected = [accs[d_new_old[i]] for i in cluster_representative]
     # print("|".join(selected))
-    # fw = fasta_writer.FastaWriter(infn)
+    # fw = fasta_processor.FastaWriter(infn)
     return selected
 
 
