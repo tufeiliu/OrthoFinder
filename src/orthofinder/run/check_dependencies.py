@@ -1,5 +1,5 @@
 from ..utils import util, program_caller, files, parallel_task_manager
-from ..gen_tree_inference import orthologues
+from ..comparative_genomics import orthologues
 
 
 def CanRunBLAST():

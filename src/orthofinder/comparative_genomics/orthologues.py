@@ -42,12 +42,12 @@ except ImportError:
 
 from ..tools import tree, wrapper_phyldog, stag, stride, trees_msa
 from ..tools import mcl as MCL
-from . import trees2ologs_dlcpar, trees2ologs_of
+from ..gen_tree_inference import trees2ologs_dlcpar, trees2ologs_of
 from ..utils import blast_file_processor as BlastFileProcessor
 
 from ..utils import util, files, parallel_task_manager, program_caller
 from ..orthogroups import accelerate, orthogroups_set
-from ..comparative_genomics import stats
+from . import stats
 
 nThreads = util.nThreadsDefault
 

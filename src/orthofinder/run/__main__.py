@@ -79,9 +79,10 @@ from ..orthogroups import gathering, orthogroups_set
 from ..orthogroups import accelerate as acc
 
 from ..tools import astral, tree, mcl, trees_msa
-from ..gen_tree_inference import trees2ologs_of, orthologues
+from ..gen_tree_inference import trees2ologs_of
 from . import process_args, check_dependencies, run_commands, species_info
 from orthofinder import orphan_genes_version, __version__
+from ..comparative_genomics import orthologues
 
 
 # Get directory containing script/bundle
