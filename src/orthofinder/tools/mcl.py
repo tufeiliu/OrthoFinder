@@ -34,7 +34,7 @@ from collections import defaultdict, Counter
 import xml.etree.ElementTree as ET              # Y
 from xml.etree.ElementTree import SubElement    # Y
 from xml.dom import minidom
-
+from orthofinder import __version__
 
 def GetPredictedOGs(clustersFilename):
     """
@@ -158,7 +158,7 @@ class MCL:
         # Write OrthoXML file
         root = ET.Element("orthoXML")
         root.set('xsi:schemaLocation', "http://orthoXML.org/2011/ http://www.orthoxml.org/0.3/orthoxml.xsd")
-        root.set('originVersion', util.version)
+        root.set('originVersion', __version__)
         root.set('origin', 'OrthoFinder')
         root.set('version', "0.3")
         root.set('xmlns:xsi', "http://www.w3.org/2001/XMLSchema-instance")

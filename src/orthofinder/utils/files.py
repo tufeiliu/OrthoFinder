@@ -44,7 +44,7 @@ import shutil
 import datetime
 
 from . import util
-
+from orthofinder import __version__
 
 class __Files_new_dont_manually_create__(object):    
     def __init__(self):
@@ -493,7 +493,7 @@ class __Files_new_dont_manually_create__(object):
             outfile.write(prepend + text)
     
     def StartLog(self):
-        self.WriteToLog("Started OrthoFinder version " + util.version + "\n", True)
+        self.WriteToLog("Started OrthoFinder version " + __version__ + "\n", True)
         text = "Command Line: " + " ".join(sys.argv) + "\n\n"
         text += "WorkingDirectory_Base: %s\n" % self.wd_base[0]
         self.WriteToLog(text)

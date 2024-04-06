@@ -98,7 +98,8 @@ def ProcessArgs(prog_caller, args):
     """    
     
     while len(args) > 0:
-        arg = args.pop(0)    
+        arg = args.pop(0)
+
         if arg == "-f" or arg == "--fasta":
             if options.qStartFromFasta:
                 print("Repeated argument: -f/--fasta\n")
@@ -363,7 +364,7 @@ def ProcessArgs(prog_caller, args):
         elif arg == "-h" or arg == "--help":
             helpinfo.PrintHelp(prog_caller)
             util.Success()
-            
+
         else:
             print("Unrecognised argument: %s\n" % arg)
             util.Fail()

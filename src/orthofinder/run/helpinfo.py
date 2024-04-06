@@ -59,6 +59,10 @@ def PrintHelp(prog_caller):
     print(" -b  <dir>         Start OrthoFinder from pre-computed BLAST results in <dir>")   
     print(" -fg <dir>         Start OrthoFinder from pre-computed orthogroups in <dir>")
     print(" -ft <dir>         Start OrthoFinder from pre-computed gene trees in <dir>")
+
+    print("")
+    print("VERSION:")
+    print(" -v              Show the current version number")
     
     print("")
     print("LICENSE:")

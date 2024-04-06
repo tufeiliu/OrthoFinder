@@ -81,7 +81,7 @@ from ..orthogroups import accelerate as acc
 from ..tools import astral, tree, mcl, trees_msa
 from ..gen_tree_inference import trees2ologs_of, orthologues
 from . import process_args, check_dependencies, run_commands, species_info
-from orthofinder import orphan_genes_version
+from orthofinder import orphan_genes_version, __version__
 
 
 # Get directory containing script/bundle
@@ -273,151 +273,159 @@ def GetOrthologues_FromTrees(options):
     orthologues.OrthologuesFromTrees(options.recon_method, options.nBlast, options.nProcessAlg, options.speciesTreeFN,
                                      options.qAddSpeciesToIDs, options.qSplitParaClades, options.fewer_open_files)
 
-def main(args=None):    
+def main(args=None): 
     try:
         if args is None:
             args = sys.argv[1:]
-       # Create PTM right at start
-        ptm_initialised = parallel_task_manager.ParallelTaskManager_singleton()
-        print("")
-        print(("OrthoFinder version %s Copyright (C) 2014 David Emms\n" % util.version))
-        prog_caller = GetProgramCaller()
-        
-        options, fastaDir, continuationDir, resultsDir_nonDefault, pickleDir_nonDefault, user_specified_M = process_args.ProcessArgs(prog_caller, args)
-        
-        files.InitialiseFileHandler(options, fastaDir, continuationDir, resultsDir_nonDefault, pickleDir_nonDefault)     
-        print("Results directory: %s" % files.FileHandler.GetResultsDirectory1())
 
-        check_dependencies.CheckDependencies(options, user_specified_M, prog_caller, files.FileHandler.GetWorkingDirectory1_Read()[0])
+        if args[0] == "-v" or args[0] == "--version":
+            print(f"orthofinder:v{__version__}")
+            sys.exit(0)
+
+        else: 
+
+            print("")
+            print(("OrthoFinder version %s Copyright (C) 2014 David Emms\n" % __version__))
+
+        # Create PTM right at start
+            ptm_initialised = parallel_task_manager.ParallelTaskManager_singleton()
+            prog_caller = GetProgramCaller()
             
-        # if using previous Trees etc., check these are all present - Job for orthologues
-        if options.qStartFromBlast and options.qStartFromFasta:
-            # 0. Check Files
-            speciesInfoObj, speciesToUse_names = species_info.ProcessPreviousFiles(files.FileHandler.GetWorkingDirectory1_Read(), options.qDoubleBlast)
-            print("\nAdding new species in %s to existing analysis in %s" % (fastaDir, continuationDir))
-            # 3. 
-            speciesInfoObj = fasta_processor.ProcessesNewFasta(fastaDir, options.dna, speciesInfoObj, speciesToUse_names)
-            files.FileHandler.LogSpecies()
-            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
-            # 4.
-            seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
-            # 5.
-            speciesXML = species_info.GetXMLSpeciesInfo(speciesInfoObj, options) if options.speciesXMLInfoFN else None
-            # 6.    
-            util.PrintUnderline("Dividing up work for BLAST for parallel processing")
-            run_commands.CreateSearchDatabases(speciesInfoObj, options, prog_caller)
-            # 7.  
-            run_commands.RunSearch(options, speciesInfoObj, seqsInfo, prog_caller)
-            # 8.
-            speciesNamesDict = species_info.SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN())
-            gathering.DoOrthogroups(options, speciesInfoObj, seqsInfo, speciesNamesDict, speciesXML)
-            # 9.
-            if not options.qStopAfterGroups:
-                GetOrthologues(speciesInfoObj, options, prog_caller)  
+            options, fastaDir, continuationDir, resultsDir_nonDefault, pickleDir_nonDefault, user_specified_M = process_args.ProcessArgs(prog_caller, args)
+            
+            files.InitialiseFileHandler(options, fastaDir, continuationDir, resultsDir_nonDefault, pickleDir_nonDefault)     
+            print("Results directory: %s" % files.FileHandler.GetResultsDirectory1())
 
-        elif options.qStartFromFasta:
-            # 3. 
-            speciesInfoObj = None
-            speciesInfoObj = fasta_processor.ProcessesNewFasta(fastaDir, options.dna)
-            files.FileHandler.LogSpecies()
-            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
-            # 4
-            seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
-            # 5.
-            speciesXML = species_info.GetXMLSpeciesInfo(speciesInfoObj, options) if options.speciesXMLInfoFN else None
-            # 6.    
-            util.PrintUnderline("Dividing up work for BLAST for parallel processing")
-            run_commands.CreateSearchDatabases(speciesInfoObj, options, prog_caller)
-            # 7. 
-            run_commands.RunSearch(options, speciesInfoObj, seqsInfo, prog_caller)
-            # 8.
-            speciesNamesDict = species_info.SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN())
-            gathering.DoOrthogroups(options, speciesInfoObj, seqsInfo, speciesNamesDict, speciesXML)
-            # 9. 
-            if not options.qStopAfterGroups:
+            check_dependencies.CheckDependencies(options, user_specified_M, prog_caller, files.FileHandler.GetWorkingDirectory1_Read()[0])
+                
+            # if using previous Trees etc., check these are all present - Job for orthologues
+            if options.qStartFromBlast and options.qStartFromFasta:
+                # 0. Check Files
+                speciesInfoObj, speciesToUse_names = species_info.ProcessPreviousFiles(files.FileHandler.GetWorkingDirectory1_Read(), options.qDoubleBlast)
+                print("\nAdding new species in %s to existing analysis in %s" % (fastaDir, continuationDir))
+                # 3. 
+                speciesInfoObj = fasta_processor.ProcessesNewFasta(fastaDir, options.dna, speciesInfoObj, speciesToUse_names)
+                files.FileHandler.LogSpecies()
+                options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
+                # 4.
+                seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
+                # 5.
+                speciesXML = species_info.GetXMLSpeciesInfo(speciesInfoObj, options) if options.speciesXMLInfoFN else None
+                # 6.    
+                util.PrintUnderline("Dividing up work for BLAST for parallel processing")
+                run_commands.CreateSearchDatabases(speciesInfoObj, options, prog_caller)
+                # 7.  
+                run_commands.RunSearch(options, speciesInfoObj, seqsInfo, prog_caller)
+                # 8.
+                speciesNamesDict = species_info.SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN())
+                gathering.DoOrthogroups(options, speciesInfoObj, seqsInfo, speciesNamesDict, speciesXML)
+                # 9.
+                if not options.qStopAfterGroups:
+                    GetOrthologues(speciesInfoObj, options, prog_caller)  
+
+            elif options.qStartFromFasta:
+                # 3. 
+                speciesInfoObj = None
+                speciesInfoObj = fasta_processor.ProcessesNewFasta(fastaDir, options.dna)
+                files.FileHandler.LogSpecies()
+                options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
+                # 4
+                seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
+                # 5.
+                speciesXML = species_info.GetXMLSpeciesInfo(speciesInfoObj, options) if options.speciesXMLInfoFN else None
+                # 6.    
+                util.PrintUnderline("Dividing up work for BLAST for parallel processing")
+                run_commands.CreateSearchDatabases(speciesInfoObj, options, prog_caller)
+                # 7. 
+                run_commands.RunSearch(options, speciesInfoObj, seqsInfo, prog_caller)
+                # 8.
+                speciesNamesDict = species_info.SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN())
+                gathering.DoOrthogroups(options, speciesInfoObj, seqsInfo, speciesNamesDict, speciesXML)
+                # 9. 
+                if not options.qStopAfterGroups:
+                    GetOrthologues(speciesInfoObj, options, prog_caller)
+
+            elif options.qStartFromBlast:
+                # 0.
+                speciesInfoObj, _ = species_info.ProcessPreviousFiles(files.FileHandler.GetWorkingDirectory1_Read(), options.qDoubleBlast)
+                files.FileHandler.LogSpecies()
+                print("Using previously calculated BLAST results in %s" % (files.FileHandler.GetWorkingDirectory1_Read()[0]))
+                options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
+                # 4.
+                seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
+                # 5.
+                speciesXML = species_info.GetXMLSpeciesInfo(speciesInfoObj, options) if options.speciesXMLInfoFN else None
+                # 8
+                speciesNamesDict = species_info.SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN())
+                gathering.DoOrthogroups(options, speciesInfoObj, seqsInfo, speciesNamesDict, speciesXML)
+                # 9
+                if not options.qStopAfterGroups:
+                    GetOrthologues(speciesInfoObj, options, prog_caller)
+
+            elif options.qStartFromGroups:
+                # 0.
+                check_blast = not options.qMSATrees
+                speciesInfoObj, _ = species_info.ProcessPreviousFiles(continuationDir, options.qDoubleBlast, check_blast=check_blast)
+                files.FileHandler.LogSpecies()
+                options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
+                # 9
                 GetOrthologues(speciesInfoObj, options, prog_caller)
 
-        elif options.qStartFromBlast:
-            # 0.
-            speciesInfoObj, _ = species_info.ProcessPreviousFiles(files.FileHandler.GetWorkingDirectory1_Read(), options.qDoubleBlast)
-            files.FileHandler.LogSpecies()
-            print("Using previously calculated BLAST results in %s" % (files.FileHandler.GetWorkingDirectory1_Read()[0]))
-            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
-            # 4.
-            seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
-            # 5.
-            speciesXML = species_info.GetXMLSpeciesInfo(speciesInfoObj, options) if options.speciesXMLInfoFN else None
-            # 8
-            speciesNamesDict = species_info.SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN())
-            gathering.DoOrthogroups(options, speciesInfoObj, seqsInfo, speciesNamesDict, speciesXML)
-            # 9
-            if not options.qStopAfterGroups:
-                GetOrthologues(speciesInfoObj, options, prog_caller)
+            elif options.qStartFromTrees:
+                speciesInfoObj, _ = species_info.ProcessPreviousFiles(files.FileHandler.GetWorkingDirectory1_Read(), options.qDoubleBlast, check_blast=False)
+                files.FileHandler.LogSpecies()
+                options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
+                GetOrthologues_FromTrees(options)
 
-        elif options.qStartFromGroups:
-            # 0.
-            check_blast = not options.qMSATrees
-            speciesInfoObj, _ = species_info.ProcessPreviousFiles(continuationDir, options.qDoubleBlast, check_blast=check_blast)
-            files.FileHandler.LogSpecies()
-            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
-            # 9
-            GetOrthologues(speciesInfoObj, options, prog_caller)
+            elif options.qFastAdd:
+                # Prepare previous directory as database
+                speciesInfoObj, speciesToUse_names = species_info.ProcessPreviousFiles(files.FileHandler.GetWorkingDirectory1_Read(), options.qDoubleBlast, check_blast=False)
+                # Check previous directory has been done with MSA trees
+                if not acc.check_for_orthoxcelerate(continuationDir, speciesInfoObj):
+                    util.Fail()
+                util.PrintUnderline("Creating orthogroup profiles")
+                wd_list = files.FileHandler.GetWorkingDirectory1_Read()
+                fn_diamond_db, q_hogs = acc.prepare_accelerate_database(continuationDir, wd_list, speciesInfoObj.nSpAll)
+                print("\nAdding new species in %s to existing analysis in %s" % (fastaDir, continuationDir))
+                speciesInfoObj = fasta_processor.ProcessesNewFasta(fastaDir, options.dna, speciesInfoObj, speciesToUse_names)
 
-        elif options.qStartFromTrees:
-            speciesInfoObj, _ = species_info.ProcessPreviousFiles(files.FileHandler.GetWorkingDirectory1_Read(), options.qDoubleBlast, check_blast=False)
-            files.FileHandler.LogSpecies()
-            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
-            GetOrthologues_FromTrees(options)
+                options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
+                seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
+                # Add genes to orthogroups
+                results_files = acc.RunSearch(options, speciesInfoObj, fn_diamond_db, prog_caller)
 
-        elif options.qFastAdd:
-            # Prepare previous directory as database
-            speciesInfoObj, speciesToUse_names = species_info.ProcessPreviousFiles(files.FileHandler.GetWorkingDirectory1_Read(), options.qDoubleBlast, check_blast=False)
-            # Check previous directory has been done with MSA trees
-            if not acc.check_for_orthoxcelerate(continuationDir, speciesInfoObj):
-                util.Fail()
-            util.PrintUnderline("Creating orthogroup profiles")
-            wd_list = files.FileHandler.GetWorkingDirectory1_Read()
-            fn_diamond_db, q_hogs = acc.prepare_accelerate_database(continuationDir, wd_list, speciesInfoObj.nSpAll)
-            print("\nAdding new species in %s to existing analysis in %s" % (fastaDir, continuationDir))
-            speciesInfoObj = fasta_processor.ProcessesNewFasta(fastaDir, options.dna, speciesInfoObj, speciesToUse_names)
+                # Clade-specific genes
+                speciesNamesDict = species_info.SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN())
+                # if orphan_genes_version == 1:
+                #     # v1 - This is unsuitable, it does an all-v-all search of all unassigned genes. Although these should have
+                #     # been depleted of all genes that are not clade-specific, the resulting search still takes too long.
+                #     # clade_specific_orthogroups_v1 function is now inside the src/orthofinder/legacy/utils/clade_specific_orthogroups.py
+                #     clustersFilename_pairs, i_og_restart = clade_specific_orthogroups_v1(speciesInfoObj, seqsInfo, options, prog_caller, speciesNamesDict, results_files, q_hogs)
+                #     raise Exception("If q_hjogs then should be reading the N0.tsv file, not the original clusters")
+                #     gathering.post_clustering_orthogroups(clustersFilename_pairs, speciesInfoObj, seqsInfo, speciesNamesDict, options, speciesXML=None)
+                if orphan_genes_version == 2:
+                    # v2 - Infer rooted species tree from new rooted gene trees, identify new species-clades & search within these
+                    clustersFilename_pairs, i_og_restart = BetweenCoreOrthogroupsWorkflow(continuationDir, speciesInfoObj, seqsInfo, options, prog_caller, speciesNamesDict, results_files, q_hogs)
 
-            options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
-            seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
-            # Add genes to orthogroups
-            results_files = acc.RunSearch(options, speciesInfoObj, fn_diamond_db, prog_caller)
-
-            # Clade-specific genes
-            speciesNamesDict = species_info.SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN())
-            # if orphan_genes_version == 1:
-            #     # v1 - This is unsuitable, it does an all-v-all search of all unassigned genes. Although these should have
-            #     # been depleted of all genes that are not clade-specific, the resulting search still takes too long.
-            #     # clade_specific_orthogroups_v1 function is now inside the src/orthofinder/legacy/utils/clade_specific_orthogroups.py
-            #     clustersFilename_pairs, i_og_restart = clade_specific_orthogroups_v1(speciesInfoObj, seqsInfo, options, prog_caller, speciesNamesDict, results_files, q_hogs)
-            #     raise Exception("If q_hjogs then should be reading the N0.tsv file, not the original clusters")
-            #     gathering.post_clustering_orthogroups(clustersFilename_pairs, speciesInfoObj, seqsInfo, speciesNamesDict, options, speciesXML=None)
-            if orphan_genes_version == 2:
-                # v2 - Infer rooted species tree from new rooted gene trees, identify new species-clades & search within these
-                clustersFilename_pairs, i_og_restart = BetweenCoreOrthogroupsWorkflow(continuationDir, speciesInfoObj, seqsInfo, options, prog_caller, speciesNamesDict, results_files, q_hogs)
-
-                # Infer clade-specific orthogroup gene trees
-                gathering.post_clustering_orthogroups(clustersFilename_pairs, speciesInfoObj, seqsInfo,
-                                                      speciesNamesDict, options, speciesXML=None)
-                if options.speciesTreeFN is None:
-                    # No user species tree, use the one we've just inferred
-                    options.speciesTreeFN = files.FileHandler.GetSpeciesTreeResultsFN(None, True)
-            if not options.qStopAfterGroups:
-                GetOrthologues(speciesInfoObj, options, prog_caller, i_og_restart)
-        else:
-            raise NotImplementedError
-            ptm = parallel_task_manager.ParallelTaskManager_singleton()
-            ptm.Stop()
-        if not options.save_space and not options.qFastAdd:
-            # split up the orthologs into one file per species-pair
-            split_ortholog_files.split_ortholog_files(files.FileHandler.GetOrthologuesDirectory())
-        d_results = os.path.normpath(files.FileHandler.GetResultsDirectory1()) + os.path.sep
-        print("\nResults:\n    %s" % d_results)
-        util.PrintCitation(d_results)
-        files.FileHandler.WriteToLog("OrthoFinder run completed\n", True)
+                    # Infer clade-specific orthogroup gene trees
+                    gathering.post_clustering_orthogroups(clustersFilename_pairs, speciesInfoObj, seqsInfo,
+                                                        speciesNamesDict, options, speciesXML=None)
+                    if options.speciesTreeFN is None:
+                        # No user species tree, use the one we've just inferred
+                        options.speciesTreeFN = files.FileHandler.GetSpeciesTreeResultsFN(None, True)
+                if not options.qStopAfterGroups:
+                    GetOrthologues(speciesInfoObj, options, prog_caller, i_og_restart)
+            else:
+                raise NotImplementedError
+                ptm = parallel_task_manager.ParallelTaskManager_singleton()
+                ptm.Stop()
+            if not options.save_space and not options.qFastAdd:
+                # split up the orthologs into one file per species-pair
+                split_ortholog_files.split_ortholog_files(files.FileHandler.GetOrthologuesDirectory())
+            d_results = os.path.normpath(files.FileHandler.GetResultsDirectory1()) + os.path.sep
+            print("\nResults:\n    %s" % d_results)
+            util.PrintCitation(d_results)
+            files.FileHandler.WriteToLog("OrthoFinder run completed\n", True)
 
     except Exception as e:
         print(str(e))
@@ -426,5 +434,10 @@ def main(args=None):
         ptm.Stop()
         raise
 
-    ptm = parallel_task_manager.ParallelTaskManager_singleton()
-    ptm.Stop()
+    except KeyboardInterrupt:
+        print("\nProgram terminated by user.")
+        sys.exit(1)
+    
+    finally:
+        ptm = parallel_task_manager.ParallelTaskManager_singleton()
+        ptm.Stop()

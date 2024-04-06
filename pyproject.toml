@@ -9,7 +9,7 @@ authors = [
 ]
 description = "Phylogenetic orthology inference for comparative genomics"
 readme = "README.md"
-version= "2.5.5"
+version= "3.0.1"
 requires-python = ">=2.7"
 keywords = [
     "comparative genomics",
