@@ -1,4 +1,6 @@
 from ..utils import util
+from othofinder import nThreadsDefault
+
 
 def PrintHelp():
     print("Usage")    
@@ -14,7 +16,7 @@ def PrintHelp():
     
     print(("""-t max_number_of_threads, --threads max_number_of_threads
     The maximum number of processes to be run simultaneously. The deafult is %d but this 
-    should be increased by the user to the maximum number of cores available.\n""" % util.nThreadsDefault))
+    should be increased by the user to the maximum number of cores available.\n""" % nThreadsDefault))
         
     print("""-h, --help
    Print this help text""")

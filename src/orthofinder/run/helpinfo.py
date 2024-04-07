@@ -1,5 +1,5 @@
 from ..utils import util
-from orthofinder import g_mclInflation
+from orthofinder import g_mclInflation, nThreadsDefault
 
 def PrintHelp(prog_caller):  
     msa_ops = prog_caller.ListMSAMethods()
@@ -18,7 +18,7 @@ def PrintHelp(prog_caller):
     print("") 
       
     print("OPTIONS:")
-    print(" -t <int>        Number of parallel sequence search threads [Default = %d]" % util.nThreadsDefault)
+    print(" -t <int>        Number of parallel sequence search threads [Default = %d]" % nThreadsDefault)
     print(" -a <int>        Number of parallel analysis threads")
     print(" -d              Input is DNA sequences")
     print(" -M <txt>        Method for gene tree inference. Options 'dendroblast' & 'msa'")

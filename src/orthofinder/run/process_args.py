@@ -1,6 +1,6 @@
 import os
 from ..utils import util, files
-from orthofinder import __version__, g_mclInflation
+from orthofinder import __version__, g_mclInflation, nThreadsDefault
 from . import helpinfo
 import shutil
 
@@ -8,7 +8,7 @@ import shutil
 # Control
 class Options(object):#
     def __init__(self):
-        self.nBlast = util.nThreadsDefault
+        self.nBlast = nThreadsDefault
         self.nProcessAlg = None
         self.qFastAdd = False  # Add species in near-linear time
         self.qStartFromBlast = False  # remove, just store BLAST to do

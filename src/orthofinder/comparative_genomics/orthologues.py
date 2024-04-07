@@ -48,8 +48,8 @@ from ..utils import blast_file_processor as BlastFileProcessor
 from ..utils import util, files, parallel_task_manager, program_caller
 from ..orthogroups import accelerate, orthogroups_set
 from . import stats
+from orthofinder import nThreadsDefault as nThreads
 
-nThreads = util.nThreadsDefault
 
 # Fix LD_LIBRARY_PATH when using pyinstaller 
 my_env = os.environ.copy()

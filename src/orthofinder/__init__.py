@@ -1,5 +1,11 @@
+import multiprocessing as mp
 from importlib.metadata import version
+
+# Extract the version number defined in pyproject.toml
 __version__ = version(__name__)
+
+# Find the total number of threads on the host machine
+nThreadsDefault = mp.cpu_count()
 
 # MCL inflation parameter
 g_mclInflation = 1.2
