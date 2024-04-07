@@ -2,22 +2,15 @@ import os
 import numpy as np
 import subprocess
 from scipy import sparse
-import random
-import time
 import warnings
-from collections import Counter, deque
 import numpy.core.numeric as numeric
 from scipy.optimize import curve_fit
 import multiprocessing as mp
+from ..utils import util, files, blast_file_processor, matrices
 try:
     import queue
 except ImportError:
     import Queue as queue
-
-from ..tools import mcl, trees_msa
-from . import orthogroups_set
-from ..utils import util, files, blast_file_processor, matrices, parallel_task_manager
-
 
 """
 scnorm
@@ -217,7 +210,7 @@ class WaterfallMethod:
                     return
 
     @staticmethod
-    def WriteGraphParallel(seqsInfo, nProcess, i_unassigned=None, func=WriteGraph_perSpecies):
+    def WriteGraphParallel(func, seqsInfo, nProcess, i_unassigned=None):
         graphFN = files.FileHandler.GetGraphFilename(i_unassigned)
         # Should use PTM?
         with warnings.catch_warnings():

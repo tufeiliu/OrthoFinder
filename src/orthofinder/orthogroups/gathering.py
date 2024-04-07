@@ -166,7 +166,7 @@ def DoOrthogroups(options, speciesInfoObj, seqsInfo, speciesNamesDict, speciesXM
         parallel_task_manager.ManageQueue(runningProcesses, cmd_queue)
 
         util.PrintTime("Connected putative homologues")
-        graphFilename = waterfall.WaterfallMethod.WriteGraphParallel(seqsInfo, options.nProcessAlg, i_unassigned)
+        graphFilename = waterfall.WaterfallMethod.WriteGraphParallel(WriteGraph_perSpecies, seqsInfo, options.nProcessAlg, i_unassigned)
 
         # 5b. MCL
         clustersFilename, clustersFilename_pairs = files.FileHandler.CreateUnusedClustersFN(
@@ -175,7 +175,7 @@ def DoOrthogroups(options, speciesInfoObj, seqsInfo, speciesNamesDict, speciesXM
         # If processing unassigned, then ignore all 'unclustered' genes - they will include any genes not included in this search
         mcl.ConvertSingleIDsToIDPair(seqsInfo, clustersFilename, clustersFilename_pairs, q_unassigned)
     elif options.gathering_version == (3, 2):
-        graphFilename = waterfall.WaterfallMethod.WriteGraphParallel(seqsInfo, options.nProcessAlg, i_unassigned, WriteGraph_perSpecies_homology)
+        graphFilename = waterfall.WaterfallMethod.WriteGraphParallel(WriteGraph_perSpecies_homology, seqsInfo, options.nProcessAlg, i_unassigned)
         clustersFilename, clustersFilename_pairs = files.FileHandler.CreateUnusedClustersFN("_I%0.1f" % options.mclInflation, i_unassigned)
         mcl.MCL.RunMCL(graphFilename, clustersFilename, options.nProcessAlg, options.mclInflation)
         mcl.ConvertSingleIDsToIDPair(seqsInfo, clustersFilename, clustersFilename_pairs, q_unassigned)
