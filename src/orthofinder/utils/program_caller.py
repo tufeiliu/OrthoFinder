@@ -36,6 +36,27 @@ from queue import Queue
 PY2 = sys.version_info <= (3,)
 from . import util, parallel_task_manager
 
+try:
+    from importlib import resources as impresources
+except ImportError:
+    # Try backported to PY<37 `importlib_resources`.
+    import importlib_resources as impresources
+
+from orthofinder import test_sequences
+
+try:
+    longer_file = (impresources.files(test_sequences) / 'longer.txt')
+    shorter_file = (impresources.files(test_sequences) / 'shorter.txt')
+    with longer_file.open("rt") as f1, shorter_file.open("rt") as f2:  # "rt" as text file with universal newlines
+        longer_sequence = f1.read()
+        shorter_sequence = f2.read()
+except AttributeError:
+    # Python < PY3.9, fall back to method deprecated in PY3.11.
+    longer_sequence = impresources.read_text(test_sequences, 'longer.txt')
+    shorter_sequence = impresources.read_text(test_sequences, 'shorter.txt')
+except FileNotFoundError as e:
+        print(f"File not found: {e.filename}")
+
 
 class InvalidEntryException(Exception):
     pass
@@ -313,35 +334,13 @@ class ProgramCaller(object):
     def _WriteTestSequence(self, working_dir):
         fn = working_dir + "Species0.fa"
         with open(fn, 'w') as outfile:
-            outfile.write(""">A
-MSKVIELKGIYAKYNKKSDYILEDLNLNVESGEFIAIIGPSGVGKSTLFKVIVNALEISKGSVRLFGQNI
->B
-MLKLLSKFPLKVKLMALFAVILSTLHPFLSILIPTVTRQLITYLANSNINSEVSVYIFKSSWIIGSFSYA
->C
-MQITVKDLVHTFLAKTPYELNAIDNINVTIKQGEFVGVIGQTGSGKTTFIEHLNALLLPSAGSVEWVFEN
->D
-MIKVTDLMFKYPSAQANAIEKLNLEIESGKYVAILGHNGSGKSTFSKLLVALYKPADGKIELDGTTISKE""")
+            outfile.write(shorter_sequence)
         return fn
         
     def _WriteTestSequence_Longer(self, working_dir):
         fn = working_dir + "Species0.fa"
         with open(fn, 'w') as outfile:
-            outfile.write(""">0_0
-MNINSPNDKEIALKSYTETFLDILRQELGDQMLYKNFFANFEIKDVSKIGHITIGTTNVTPNSQYVIRAY
-ESSIQKSLDETFERKCTFSFVLLDSAVKKKVKRERKEAAIENIELSNREVDKTKTFENYVEGNFNKEAIR
-IAKLIVEGEEDYNPIFIYGKSGIGKTHLLNAICNELLKKEVSVKYINANSFTRDISYFLQENDQRKLKQI
-RNHFDNADIVMFDDFQSYGIGNKKATIELIFNILDSRINQKRTTIICSDRPIYSLQNSFDARLISRLSMG
-LQLSIDEPQKADLLKILDYMIDINKMTPELWEDDAKNFIVKNYANSIRSLIGAVNRLRFYNSEIVKTNSR
-YTLAIVNSILKDIQQVKEKVTPDVIIEYVAKYYKLSRSEILGKSRRKDVVLARHIAIWIVKKQLDLSLEQ
-IGRFFGNRDHSTIINAVRKIEKETEQSDITFKRTISEISNEIFKKN
->1_2
-MKTKLKRFLEEISVHFNEANSELLDAFVHSIDFVFEENDNIYIYFESPYFFNEFKNKLNHLINVENAVVF
-NDYLSLEWKKIIKENKRVNLLNKKEADTLKEKLATLKKQEKYKINPLSKGIKEKYNFGNYLVFEFNKEAV
-YLAKQIANKTTHSNWNPIIIEGKPGYGKSHLLQAIANERQKLFPEEKICVLSSDDFGSEFLKSVIAPDPT
-HIESFKSKYKDYDLLMIDDVQIISNRPKTNETFFTIFNSLVDQKKTIVITLDCKIEEIQDKLTARMISRF
-QKGINVRINQPNKNEIIQIFKQKFKENNLEKYMDDHVIEEISDFDEGDIRKIEGSVSTLVFMNQMYGSTK
-TKDQILKSFIEKVTNRKNLILSKDPKYVFDKIKYHFNVSEDVLKSSKRKKEIVQARHICMYVLKNVYNKN
-LSQIGKLLRKDHTTVRHGIDKVEEELENDPNLKSFLDLFKN""")
+            outfile.write(longer_sequence)
         return fn
    
     @staticmethod
