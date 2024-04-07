@@ -41,8 +41,11 @@ if __name__ == "__main__":
     #     # should be very small as we never try to create many processes
     #     mp.set_start_method('spawn')
 
+    args = sys.argv[1:]
+    main(args)
 
-from ..utils import parallel_task_manager, blast_file_processor, \
+
+from ..utils import parallel_task_manager, blast_file_processor, timeit, \
     files, util, matrices, program_caller, split_ortholog_files, fasta_processor
 
 ptm_initialised = parallel_task_manager.ParallelTaskManager_singleton()
@@ -274,6 +277,7 @@ def GetOrthologues_FromTrees(options):
     orthologues.OrthologuesFromTrees(options.recon_method, options.nBlast, options.nProcessAlg, options.speciesTreeFN,
                                      options.qAddSpeciesToIDs, options.qSplitParaClades, options.fewer_open_files)
 
+@timeit.timeit
 def main(args=None): 
     try:
         if args is None:
