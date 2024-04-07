@@ -35,12 +35,8 @@ try:
     import queue
 except ImportError:
     import Queue as queue
-import multiprocessing as mp
 from collections import namedtuple
 from orthofinder import citation
-
-nThreadsDefault = mp.cpu_count()
-
 from ..tools import tree
 from . import parallel_task_manager
 
