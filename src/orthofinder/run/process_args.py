@@ -3,6 +3,19 @@ from ..utils import util, files
 from orthofinder import __version__, g_mclInflation, nThreadsDefault
 from . import helpinfo
 import shutil
+from typing import Optional
+
+
+# Default DIAMOND custom scoring matricies and their corresponding gapopen and gapextend values
+diamond_cm_options = {"BLOSUM45": [{2: 14}, {3: (10, 13), 2: (12, 16), 1: (16, 19)}],
+                        "BLOSUM50": [{2: 13}, {3: (9, 13), 2: (12, 16), 1: (15, 19)}],
+                        "BLOSUM62": [{1: 11}, {2: (6, 11), 1: (9, 13)}],
+                        "BLOSUM80": [{1: 10}, {2: [6, 7, 8, 9, 13, 25], 1: (9, 11)}],
+                        "BLOSUM90": [{1: 10}, {2: (6, 11), 1: (9, 11)}],
+                        "PAM250": [{2: 14}, {3: (11, 15), 2: (13, 17), 1: (17, 21)}],
+                        "PAM70": [{1: 10}, {2: (6, 8), 1: (9, 11)}],
+                        "PAM30": [{1: 9}, {2: (5, 7), 1: (8, 10)}],
+}
 
 
 # Control
@@ -40,6 +53,9 @@ class Options(object):#
         self.save_space = False  # On complete, have only one orthologs file per species
         self.v2_scores = False
         self.root_from_previous = False
+        self.score_matrix = "BLOSUM62"
+        self.gapopen = None
+        self.gapextend = None
 
     def what(self):
         for k, v in self.__dict__.items():
@@ -59,6 +75,78 @@ def GetDirectoryArgument(arg, args):
         util.Fail()
     return directory
 
+def GetScoreMatrix(matrixid: str):
+    if matrixid.upper() in diamond_cm_options:
+        return matrixid.upper()
+    else:
+        if os.path.isfile(matrixid):
+            return matrixid
+        else:
+            raise Exception("The custom scoring matrix file doesn't exist!")
+     
+def GetGapExtend(matrixid: str, gapextend: Optional[str] = None):
+    if not gapextend:
+        if matrixid.upper() in diamond_cm_options:
+            return str([*diamond_cm_options[matrixid][0].keys()][0])
+
+    if len(gapextend) != 0:
+        try: 
+            gapextend_penalty = abs(int(gapextend))
+        except ValueError as e:
+            print(f"You have entered an unrecognisable --gapextend value {gapextend}!")
+            print(f"The gapextend penalty needs to be positive integers!")
+
+        if matrixid.upper() in diamond_cm_options:
+            allowed_gapextend = [*diamond_cm_options[matrixid][1].keys()]
+            if gapextend_penalty in allowed_gapextend:
+                return str(gapextend_penalty)
+            else:
+                raise Exception(f"User defined --gapextend penalty is not allowed by DIAMOND. Acceptable gapextend is {allowed_gapextend}")
+        else:
+            return str(gapextend_penalty)
+
+
+def GetGapOpen(matrixid: str, gapopen: Optional[str] = None, gapextend: Optional[str] = None):
+    
+    if not gapopen and not gapextend:
+        if matrixid.upper() in diamond_cm_options:
+            return str([*diamond_cm_options[matrixid][0].values()][0])
+
+    if not gapopen and gapextend:
+        if matrixid.upper() in diamond_cm_options:
+            gapextend = int(GetGapExtend(matrixid, gapextend))
+            gapopen_range = diamond_cm_options[matrixid][1][gapextend]
+            if isinstance(gapopen_range, tuple):
+                return str(gapopen_range[1])
+            elif isinstance(gapopen_range, list):
+                return str(max(apopen_range))
+
+    if len(gapopen) != 0:
+        try:
+            gapopen_penalty = abs(int(gapopen))
+        except ValueError as e:
+            print(f"You have entered an unrecognisable --gapopen value {gapopen}!")
+            print(f"The gapopen penalty needs to be positive integers!")
+
+        if matrixid.upper() in diamond_cm_options:
+            allowed_gapextend = [*diamond_cm_options[matrixid][1].keys()]
+            gapextend = int(GetGapExtend(matrixid, gapextend))
+            if gapextend in allowed_gapextend:
+                gapopen_range = diamond_cm_options[matrixid][1][gapextend]
+                if isinstance(gapopen_range, tuple):
+                    if gapopen_penalty >= gapopen_range[0] and gapopen_penalty <= gapopen_range[1]:
+                        return str(gapopen_penalty)
+                    else:
+                        raise Exception(f"User defined --gapopen penalty is not allowed by DIAMOND. Acceptable gapopen when gapextend={gapextend} is between {gapopen_range}")
+                
+                elif isinstance(gapopen_range, list):
+                    if gaoopen_penalty in gapopen_range:
+                        return str(gapopen_penalty)
+                    else:
+                        raise Exception(f"User defined --gapopen penalty is not allowed by DIAMOND. When gapextend={gapextend} the acceptable gapopen penalties are {gapopen_range}")
+        
+        else:
+            return str(gapopen_penalty)
 
 def ProcessArgs(prog_caller, args):
     """ 
@@ -365,9 +453,25 @@ def ProcessArgs(prog_caller, args):
             helpinfo.PrintHelp(prog_caller)
             util.Success()
 
+        elif arg == "--matrix" or arg == "--custom-matrix":
+            options.score_matrix = GetScoreMatrix(args.pop(0))
+
+        elif arg == "-ge" or arg == "--gapextend":
+            options.gapextend = GetGapExtend(options.score_matrix, args.pop(0))
+        
+        elif arg == "-go"  or arg == "--gapopen":
+            if options.score_matrix in diamond_cm_options and options.gapextend is None:
+                raise Exception("The gapopen penalty cannot be define before gapextend")
+            options.gapopen = GetGapOpen(options.score_matrix, args.pop(0), options.gapextend)
+
         else:
             print("Unrecognised argument: %s\n" % arg)
             util.Fail()
+
+    if options.gapextend is None:
+        options.gapextend = GetGapExtend(options.score_matrix)
+    if options.gapopen is None:
+        options.gapopen = GetGapOpen(options.score_matrix, gapextend=options.gapextend)
 
     # set a default for number of algorithm threads
     if options.nProcessAlg is None:

@@ -139,23 +139,6 @@ class GeneToSpecies_OrthoFinder(GeneToSpecies):
         self.startswith = {("%d_" % sp):str(sp) for sp in speciesToUse}
         self.species = list(map(str,speciesToUse))
         self.sp_to_i = {s:i for i,s in enumerate(self.species)}
-            
-
-def GetDirectoryName(baseDirName, i):
-    if i == 0:
-        return baseDirName + os.sep
-    else:
-        return baseDirName + ("_%d" % i) + os.sep
-        
-def CreateNewWorkingDirectory(baseDirectoryName):
-    dateStr = datetime.date.today().strftime("%b%d") 
-    iAppend = 0
-    newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, iAppend)
-    while os.path.exists(newDirectoryName):
-        iAppend += 1
-        newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, iAppend)
-    os.mkdir(newDirectoryName)
-    return newDirectoryName
 
 def GetDistances_fast(t, nSp, g_to_i):
     D = np.ones((nSp, nSp)) * 9e99
@@ -267,7 +250,7 @@ def main(args):
     dir_in = args.gene_trees
     astral_jar = None
     gene_to_species = GeneToSpecies(args.species_map)
-    dir_out = CreateNewWorkingDirectory(dir_in + "/../STAG_Results")
+    dir_out = util.CreateNewWorkingDirectory(dir_in + "/../STAG_Results")
     CheckFastME(dir_out)
     dir_matrices = dir_out + "DistanceMatrices/"
     os.mkdir(dir_matrices)

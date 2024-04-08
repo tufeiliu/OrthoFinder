@@ -46,7 +46,11 @@ def CheckDependencies(options, user_specified_m, prog_caller, dirForTempFiles):
             if not CanRunBLAST(): util.Fail()
         else:
             d_deps_check = files.FileHandler.GetDependenciesCheckDir()
-            success, stdout, stderr, cmd = prog_caller.TestSearchMethod(options.search_program, d_deps_check)
+            success, stdout, stderr, cmd = prog_caller.TestSearchMethod(options.search_program, 
+                                                                        d_deps_check,
+                                                                        scorematrix=options.score_matrix,
+                                                                        gapopen=options.gapopen,
+                                                                        gapextend=options.gapextend)
             if not success:
                 print("\nERROR: Cannot run %s" % options.search_program)
                 prog_caller.PrintDependencyCheckFailure(cmd)

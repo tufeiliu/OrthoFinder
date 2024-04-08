@@ -164,10 +164,15 @@ class ProgramCaller(object):
         return self._GetCommand('msa', method_name, infilename, outfilename_proposed, identifier, nSeqs=nSeqs)
     def GetTreeMethodCommand(self, method_name, infilename, outfilename_proposed, identifier, nSeqs=None):
         return self._GetCommand('tree', method_name, infilename, outfilename_proposed, identifier, nSeqs=nSeqs)
-    def GetSearchMethodCommand_DB(self, method_name, infilename, outfilename):
-        return self._GetCommand('search_db', method_name, infilename, outfilename)[0]  # output filename isn't returned
-    def GetSearchMethodCommand_Search(self, method_name, queryfilename, dbfilename, outfilename):
-        return self._GetCommand('search_search', method_name, queryfilename, outfilename, None, dbfilename)[0]  # output filename isn't returned
+    def GetSearchMethodCommand_DB(self, method_name, infilename, outfilename, 
+                                  scorematrix=None, gapopen=None, gapextend=None):
+        return self._GetCommand('search_db', method_name, infilename, outfilename, 
+                                 scorematrix=scorematrix, gapopen=gapopen, gapextend=gapextend)[0]  # output filename isn't returned
+    def GetSearchMethodCommand_Search(self, method_name, queryfilename, dbfilename, outfilename, \
+                                      scorematrix=None, gapopen=None, gapextend=None):
+        return self._GetCommand('search_search', method_name, queryfilename, 
+                                 outfilename, None, dbfilename, 
+                                 scorematrix=scorematrix, gapopen=gapopen, gapextend=gapextend)[0]  # output filename isn't returned
     
     
     def GetMSACommands(self, method_name, infn_list, outfn_list, id_list, nSeqs=None):
@@ -184,10 +189,14 @@ class ProgramCaller(object):
         
     def GetSearchCommands_DB(self, method_name,  infn_list, outfn_list):        
         return [self.GetSearchMethodCommand_DB(method_name, infn, outfn) for infn, outfn in zip(infn_list, outfn_list)]
-        
-    def GetSearchCommands_Search(self, method_name, querryfn_list, dblist, outfn_list):        
-        return [self.GetSearchMethodCommand_Search(method_name, querryfn, dbname, outfn) for querryfn, dbname, outfn in zip(querryfn_list, dblist, outfn_list)]
-    
+
+    def GetSearchCommands_Search(self, method_name, querryfn_list, dblist, outfn_list,
+                                 scorematrix=None, gapopen=None, gapextend=None):        
+        return [self.GetSearchMethodCommand_Search(method_name, querryfn, 
+                                                   dbname, outfn,
+                                                   scorematrix=scorematrix, 
+                                                   gapopen=gapopen, 
+                                                   gapextend=gapextend) for querryfn, dbname, outfn in zip(querryfn_list, dblist, outfn_list)]
     
     def CallMSAMethod(self, method_name, infilename, outfilename, identifier, nSeqs=None):
         return self._CallMethod('msa', method_name, infilename, outfilename, identifier, nSeqs=nSeqs)
@@ -198,24 +207,33 @@ class ProgramCaller(object):
     def CallSearchMethod_DB(self, method_name, infilename, outfilename):
         return self._CallMethod('search_db', method_name, infilename, outfilename)     
         
-    def CallSearchMethod_Search(self, method_name, queryfilename, dbfilename, outfilename):
-        return self._CallMethod('search_search', method_name, queryfilename, outfilename, dbname=dbfilename)  
-        
-        
+    def CallSearchMethod_Search(self, method_name, queryfilename, 
+                                dbfilename, outfilename,
+                                scorematrix=None, gapopen=None, gapextend=None):
+        return self._CallMethod('search_search', method_name, queryfilename, 
+                                outfilename, dbname=dbfilename, 
+                                scorematrix=scorematrix, gapopen=gapopen, gapextend=gapextend)  
+
     def TestMSAMethod(self, method_name, d_test):
         return self._TestMethod('msa', method_name, d_test)
         
     def TestTreeMethod(self, method_name, d_test):
         return self._TestMethod('tree', method_name, d_test)
         
-    def TestSearchMethod(self, method_name, d_deps_check):
+    def TestSearchMethod(self, method_name, d_deps_check, 
+                         scorematrix=None, gapopen=None, gapextend=None):
         success = False
         fasta = self._WriteTestSequence_Longer(d_deps_check)
         dbname = d_deps_check + method_name + "DBSpecies0"
         stdout_db, stderr_db, cmd_db = self.CallSearchMethod_DB(method_name, fasta, dbname)
         # it doesn't matter what file(s) it writes out the database to, only that we can use the database
         resultsfn = d_deps_check + "test_search_results.txt"
-        stdout_s, stderr_s, cmd_s = self.CallSearchMethod_Search(method_name, fasta, dbname, resultsfn)
+        stdout_s, stderr_s, cmd_s = self.CallSearchMethod_Search(method_name, fasta, 
+                                                                 dbname, resultsfn,
+                                                                 scorematrix=scorematrix,
+                                                                 gapopen=gapopen,
+                                                                 gapextend=gapextend)
+
         success = os.path.exists(resultsfn) or os.path.exists(resultsfn + ".gz")
         if not success:
             print("%s produced the following output:" % method_name)
@@ -226,9 +244,19 @@ class ProgramCaller(object):
         cmd = cmd_db + "\n" + cmd_s
         return success, stdout_db  + stdout_s, stderr_db + stderr_s, cmd
     
-    def _CallMethod(self, method_type, method_name, infilename, outfilename, identifier=None, dbname=None, nSeqs=None):
-        cmd, actual_target_fns = self._GetCommand(method_type, method_name, infilename, outfilename, identifier, dbname, nSeqs)
-        capture = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=parallel_task_manager.my_env)
+    def _CallMethod(self, method_type, method_name, infilename,
+                    outfilename, identifier=None, dbname=None, nSeqs=None, 
+                    scorematrix=None, gapopen=None, gapextend=None):
+
+        cmd, actual_target_fns = self._GetCommand(method_type, method_name, infilename, 
+                                                  outfilename, identifier, dbname, nSeqs, 
+                                                  scorematrix=scorematrix,
+                                                  gapopen=gapopen, 
+                                                  gapextend=gapextend)
+        capture = subprocess.Popen(cmd, shell=True, 
+                                   stdout=subprocess.PIPE, 
+                                   stderr=subprocess.PIPE, 
+                                   env=parallel_task_manager.my_env)
         stdout = [x for x in capture.stdout]
         stderr = [x for x in capture.stderr]
         try:
@@ -277,14 +305,29 @@ class ProgramCaller(object):
             print("".join(stderr))
         return success, stdout, stderr, cmd
 
-    def _ReplaceVariables(self, instring, infilename, outfilename, identifier=None, dbname=None):
+    def _ReplaceVariables(self, instring, infilename, outfilename, 
+                          identifier=None, dbname=None, scorematrix=None, 
+                          gapopen=None, gapextend=None):
+
         path, basename = os.path.split(infilename)
         path_out, basename_out = os.path.split(outfilename)
-        outstring = instring.replace("INPUT", infilename).replace("OUTPUT", outfilename).replace("BASENAME", basename).replace("PATH", path).replace("BASEOUTNAME", basename_out) 
+        outstring = instring.replace("INPUT", infilename).\
+                    replace("OUTPUT", outfilename).\
+                    replace("BASENAME", basename).\
+                    replace("PATH", path).\
+                    replace("BASEOUTNAME", basename_out)
+
+        if "diamond" in instring:
+            if scorematrix and gapopen and gapextend:
+                outstring = outstring.replace("SCOREMATRIX", scorematrix).\
+                            replace("GAPOPEN", gapopen).\
+                            replace("GAPEXTEND", gapextend)
+        
         if identifier != None:
             outstring = outstring.replace("IDENTIFIER", identifier)
         if dbname != None:
             outstring = outstring.replace("DATABASE", dbname)
+
         return outstring
 
     def _GetMethodTypeName(self, method_type):
@@ -297,7 +340,11 @@ class ProgramCaller(object):
         else:
             raise NotImplementedError
         
-    def _GetCommand(self, method_type, method_name, infilename, outfilename_proposed, identifier=None, dbname=None, nSeqs=None):
+    def _GetCommand(self, method_type, method_name, 
+                    infilename, outfilename_proposed, 
+                    identifier=None, dbname=None,
+                    nSeqs=None, scorematrix=None,
+                    gapopen=None, gapextend=None):
         """
         Returns:
             cmd, actual_target_fn
@@ -306,6 +353,7 @@ class ProgramCaller(object):
                 actual_target_fn - None if the cmd will save the results file to outfilename_proposed 
                                    otherwise (actual_fn, outfilename_proposed)
         """
+        
         if method_type == 'msa':
             dictionary = self.msa
         elif method_type == 'tree':
@@ -319,13 +367,27 @@ class ProgramCaller(object):
         if method_name not in dictionary:
             raise Exception("No %s method called '%s'" % (self._GetMethodTypeName(method_type), method_name))
         method_parameters = dictionary[method_name]
+
         if nSeqs != None and method_parameters.cmd_fast != None and nSeqs >= method_parameters.n_seqs_use_fast:
-            cmd = self._ReplaceVariables(method_parameters.cmd_fast, infilename, outfilename_proposed, identifier, dbname)
+            cmd = self._ReplaceVariables(method_parameters.cmd_fast, infilename, 
+                                         outfilename_proposed, identifier, dbname,
+                                         scorematrix=scorematrix, 
+                                         gapopen=gapopen,
+                                         gapextend=gapextend)
         else:
-            cmd = self._ReplaceVariables(method_parameters.cmd, infilename, outfilename_proposed, identifier, dbname)
+            cmd = self._ReplaceVariables(method_parameters.cmd, infilename, 
+                                         outfilename_proposed, identifier, dbname,
+                                         scorematrix=scorematrix, 
+                                         gapopen=gapopen,
+                                         gapextend=gapextend)
         actual_target_fn = None
         if method_parameters.non_default_outfn:
-            actual_fn = self._ReplaceVariables(method_parameters.non_default_outfn, infilename, outfilename_proposed, identifier)
+            actual_fn = self._ReplaceVariables(method_parameters.non_default_outfn, 
+                                               infilename, outfilename_proposed, identifier,
+                                               scorematrix=scorematrix, 
+                                               gapopen=gapopen,
+                                               gapextend=gapextend)
+
             target_fn = outfilename_proposed
             actual_target_fn = (actual_fn, target_fn)
         # print((cmd, actual_target_fn))

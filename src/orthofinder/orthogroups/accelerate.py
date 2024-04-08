@@ -42,7 +42,12 @@ def prepare_accelerate_database(input_dir, wd_list, nSpAll):
 def RunSearch(options, speciessInfoObj, fn_diamond_db, prog_caller, q_one_query=False):
     name_to_print = "BLAST" if options.search_program == "blast" else options.search_program
     util.PrintUnderline("Running %s profiles search" % name_to_print)
-    commands, results_files = GetOrderedSearchCommands(speciessInfoObj, fn_diamond_db, prog_caller, q_one_query=q_one_query, threads=options.nBlast)
+    commands, results_files = GetOrderedSearchCommands(speciessInfoObj, 
+                                                       fn_diamond_db, 
+                                                       options,
+                                                       prog_caller, 
+                                                       q_one_query=q_one_query, 
+                                                       threads=options.nBlast)
     if q_one_query:
         return_code = parallel_task_manager.RunCommand(commands[0], qPrintOnError=True)
         if return_code != 0:
@@ -55,7 +60,7 @@ def RunSearch(options, speciessInfoObj, fn_diamond_db, prog_caller, q_one_query=
     return results_files
 
 
-def GetOrderedSearchCommands(speciesInfoObj, diamond_db, prog_caller, q_one_query, threads=1, search_program="diamond",):
+def GetOrderedSearchCommands(speciesInfoObj, diamond_db, options, prog_caller, q_one_query, threads=1):
     """ Using the nSeq1 x nSeq2 as a rough estimate of the amount of work required for a given species-pair, returns the commands
     ordered so that the commands predicted to take the longest come first. This allows the load to be balanced better when processing
     the BLAST commands.
@@ -76,10 +81,13 @@ def GetOrderedSearchCommands(speciesInfoObj, diamond_db, prog_caller, q_one_quer
         results_files = [results + ".gz"]
     else:
         commands = [prog_caller.GetSearchMethodCommand_Search(
-            search_program,
+            options.search_program,
             files.FileHandler.GetSpeciesFastaFN(iFasta),
             diamond_db,
-            files.FileHandler.GetBlastResultsFN(iFasta, -1, qForCreation=True))
+            files.FileHandler.GetBlastResultsFN(iFasta, -1, qForCreation=True),
+            scorematrix=options.score_matrix, 
+            gapopen=options.gapopen, 
+            gapextend=options.gapextend)
             for iFasta in iSpeciesNew
         ]
         results_files = [files.FileHandler.GetBlastResultsFN(iFasta, -1, qForCreation=True) + ".gz" for iFasta in iSpeciesNew]

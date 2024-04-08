@@ -64,7 +64,12 @@ class __Files_new_dont_manually_create__(object):
      
     """ ========================================================================================== """
     # RefactorDS - FileHandler
-    def CreateOutputDirFromStart_new(self, fasta_dir, base, user_name = None, old_wd_base_list=None):
+    def CreateOutputDirFromStart_new(self, fasta_dir, base, 
+                                     user_name = None, 
+                                     old_wd_base_list=None,
+                                     scorematrix=None,
+                                     gapopen=None,
+                                     gapextend=None):
         """
         The initial difference will be that results will go in OrthoFinder/Results_DATE or USER_SPECIFIED/RESULTS_DATE
         whereas before they went in Results_DATE or USER_SPECIFIED.
@@ -75,9 +80,16 @@ class __Files_new_dont_manually_create__(object):
           ones itself then there will be other items in the list.
         """
         if user_name == None:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_")
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_", 
+                                                      scorematrix=scorematrix,
+                                                      gapopen=gapopen,
+                                                      gapextend=gapextend)
         else:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, qDate=False)
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, 
+                                                      qDate=False,
+                                                      scorematrix=scorematrix,
+                                                      gapopen=gapopen,
+                                                      gapextend=gapextend)
         self.wd_current = self.rd1 + "WorkingDirectory/"
         os.mkdir(self.wd_current)
         self.wd_base = [self.wd_current]        
@@ -93,7 +105,13 @@ class __Files_new_dont_manually_create__(object):
         self.StartLog()
         
     # RefactorDS - PreviousFilesLocator
-    def StartFromOrthogroupsOrSequenceSearch(self, wd_base_list, base, clustersFilename_pairs=None, user_name = None, userSpeciesTree=None):
+    def StartFromOrthogroupsOrSequenceSearch(self, wd_base_list, base, 
+                                             clustersFilename_pairs=None, 
+                                             user_name = None, 
+                                             userSpeciesTree=None,
+                                             scorematrix=None,
+                                             gapopen=None,
+                                             gapextend=None):
         """
         NEed to initialise:
         wd_base
@@ -104,9 +122,16 @@ class __Files_new_dont_manually_create__(object):
         self.wd_base = wd_base_list
         if clustersFilename_pairs != None: self.clustersFilename = clustersFilename_pairs[:-len("_id_pairs.txt")]
         if user_name == None:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_")
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_", 
+                                                      scorematrix=scorematrix,
+                                                      gapopen=gapopen,
+                                                      gapextend=gapextend)
         else:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, qDate=False)
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, 
+                                                      qDate=False,
+                                                      scorematrix=scorematrix,
+                                                      gapopen=gapopen,
+                                                      gapextend=gapextend)
         self.wd_current = self.rd1 + "WorkingDirectory/"
         os.mkdir(self.wd_current)
         with open(self.rd1 + "Log.txt", 'w'):
@@ -122,7 +147,10 @@ class __Files_new_dont_manually_create__(object):
                        clustersFilename_pairs,
                        speciesTreeFN, 
                        qIsUSerSpeciesTree,
-                       user_name=None):
+                       user_name=None,
+                       scorematrix=None,
+                       gapopen=None,
+                       gapextend=None):
         """
         Convert user species tree here if necessary
         For OF species tree copy it to location given by FileHandler
@@ -131,9 +159,16 @@ class __Files_new_dont_manually_create__(object):
         self.wd_base = wd1_list
         self.wd_trees = wd2
         if user_name == None:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_")
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_", 
+                                                      scorematrix=scorematrix,
+                                                      gapopen=gapopen,
+                                                      gapextend=gapextend)
         else:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, qDate=False)
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, 
+                                                      qDate=False,
+                                                      scorematrix=scorematrix,
+                                                      gapopen=gapopen,
+                                                      gapextend=gapextend)
         self.wd_current = self.rd1 + "WorkingDirectory/"
         os.mkdir(self.wd_current)
         self.clustersFilename = clustersFilename_pairs[:-len("_id_pairs.txt")]
@@ -146,23 +181,38 @@ class __Files_new_dont_manually_create__(object):
     def CreateOutputDirectories(self, options, previous_files_locator, base_dir, fastaDir=None):
         if (options.qStartFromFasta and options.qStartFromBlast) or options.qFastAdd:
             wd1 = previous_files_locator.GetStartFromBlast()
-            self.CreateOutputDirFromStart_new(fastaDir, base_dir, user_name=options.name, old_wd_base_list = wd1)
+            self.CreateOutputDirFromStart_new(fastaDir, base_dir, 
+                                              user_name=options.name, 
+                                              old_wd_base_list = wd1,
+                                              scorematrix=options.score_matrix,
+                                              gapopen=options.gapopen,
+                                              gapextend=options.gapextend)
 
         elif options.qStartFromFasta:
-            self.CreateOutputDirFromStart_new(fastaDir, base_dir, user_name=options.name)
+            self.CreateOutputDirFromStart_new(fastaDir, base_dir, 
+                                              user_name=options.name,
+                                              scorematrix=options.score_matrix,
+                                              gapopen=options.gapopen,
+                                              gapextend=options.gapextend)
             
         elif options.qStartFromBlast: 
             wd1 = previous_files_locator.GetStartFromBlast()
             self.StartFromOrthogroupsOrSequenceSearch(wd1, 
                                                       base_dir,
-                                                      user_name=options.name)  
+                                                      user_name=options.name,
+                                                      scorematrix=options.score_matrix,
+                                                      gapopen=options.gapopen,
+                                                      gapextend=options.gapextend)  
             
         elif options.qStartFromGroups:
             wd1, clustersFilename_pairs = previous_files_locator.GetStartFromOGs()
             self.StartFromOrthogroupsOrSequenceSearch(wd1, 
                                                       base_dir,
                                                       clustersFilename_pairs, 
-                                                      user_name=options.name)
+                                                      user_name=options.name,
+                                                      scorematrix=options.score_matrix,
+                                                      gapopen=options.gapopen,
+                                                      gapextend=options.gapextend)  
                                                       
         elif options.qStartFromTrees:
             wd1, clustersFilename_pairs, wd_trees, speciesTreeFN = previous_files_locator.GetStartFromTrees()

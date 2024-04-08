@@ -31,7 +31,9 @@ def RunBlastDBCommand(command):
 
 
 # 7
-def RunSearch(options, speciessInfoObj, seqsInfo, prog_caller, q_new_species_unassigned_genes=False, n_genes_per_species=None, species_clades=None):
+def RunSearch(options, speciessInfoObj, seqsInfo, prog_caller, 
+              q_new_species_unassigned_genes=False, 
+              n_genes_per_species=None, species_clades=None):
     """
     n_genes_per_species: List[int] - optional, for use with unassigned genes. If a species has zero unassigned genes, don't search with/agaisnt it.
     """
@@ -43,9 +45,19 @@ def RunSearch(options, speciessInfoObj, seqsInfo, prog_caller, q_new_species_una
     else:
         util.PrintUnderline("Running %s all-versus-all" % name_to_print)
     if species_clades is None:
-        commands = run_info.GetOrderedSearchCommands(seqsInfo, speciessInfoObj, options.qDoubleBlast, options.search_program, prog_caller, n_genes_per_species, q_new_species_unassigned_genes=q_new_species_unassigned_genes)
+        commands = run_info.GetOrderedSearchCommands(seqsInfo, 
+                                                     speciessInfoObj,
+                                                     options,
+                                                     prog_caller, 
+                                                     n_genes_per_species, 
+                                                     q_new_species_unassigned_genes=q_new_species_unassigned_genes)
     else:
-        commands = run_info.GetOrderedSearchCommands_clades(seqsInfo, speciessInfoObj, options.qDoubleBlast, options.search_program, prog_caller, n_genes_per_species, species_clades)
+        commands = run_info.GetOrderedSearchCommands_clades(seqsInfo, 
+                                                            speciessInfoObj,
+                                                            options,
+                                                            prog_caller, 
+                                                            n_genes_per_species, 
+                                                            species_clades)
     if options.qStopAfterPrepare:
         for command in commands:
             print(command)
@@ -82,7 +94,12 @@ def CreateSearchDatabases(speciesInfoObj, options, prog_caller, q_unassigned_gen
             util.PrintTime("Creating Blast database %d of %d" % (iSp + 1, len(iSpeciesToDo)))
             run_commands.RunBlastDBCommand(command) 
         else:
-            command = prog_caller.GetSearchMethodCommand_DB(options.search_program, fn_fasta, files.FileHandler.GetSpeciesDatabaseN(iSp, options.search_program))
+            command = prog_caller.GetSearchMethodCommand_DB(options.search_program, 
+                                                            fn_fasta, 
+                                                            files.FileHandler.GetSpeciesDatabaseN(iSp, options.search_program),
+                                                            options.score_matrix,
+                                                            options.gapopen,
+                                                            options.gapextend)
             util.PrintTime("Creating %s database %d of %d" % (options.search_program, iSp + 1, len(iSpeciesToDo)))
             ret_code = parallel_task_manager.RunCommand(command, qPrintOnError=True, qPrintStderr=False)
             if ret_code != 0:

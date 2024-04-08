@@ -35,7 +35,7 @@ import argparse
 import itertools
 import multiprocessing as mp
 from collections import Counter, defaultdict
-
+from ..utils import util
 from . import probroot, tree 
 
 PY2 = sys.version_info <= (3,)
@@ -567,23 +567,7 @@ def PrintRootingSummary(roots, clusters_counter, nSupport):
         print("Etc...")
         print(("%d possible roots" % len(roots)))
     return nFP_mp, n_non_trivial 
-    
-def GetDirectoryName(baseDirName, i):
-    if i == 0:
-        return baseDirName + os.sep
-    else:
-        return baseDirName + ("_%d" % i) + os.sep
-        
-def CreateNewWorkingDirectory(baseDirectoryName):
-    dateStr = datetime.date.today().strftime("%b%d") 
-    iAppend = 0
-    newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, iAppend)
-    while os.path.exists(newDirectoryName):
-        iAppend += 1
-        newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, iAppend)
-    os.mkdir(newDirectoryName)
-    return newDirectoryName
-        
+
 def GetCluseterName(species_tree, S, cluster):
     if len(cluster) == 1: return list(cluster)[0]
     else:
@@ -704,7 +688,7 @@ def Main_Full(args):
 #        roots, clusters_counter, _, nSupport, clades, species = GetRoot(args.Species_tree, args.gene_trees, GeneToSpecies, nProcs, treeFmt = 1, qWriteDupTrees=args.output)
         roots, clusters_counter, _, nSupport, clades, species, all_stride_dup_genes = GetRoot(args.Species_tree, args.gene_trees, GeneToSpecies, nProcs)
         PrintRootingSummary(roots, clusters_counter, nSupport)
-        outputDir = CreateNewWorkingDirectory(args.gene_trees + "/../STRIDE_Results")
+        outputDir = util.CreateNewWorkingDirectory(args.gene_trees + "/../STRIDE_Results")
 #        shelveFN = outputDir + "STRIDE_data.shv"
 #        d = shelve.open(shelveFN)
 #        d['roots'] = roots
