@@ -12,13 +12,14 @@ import multiprocessing
 import copy
 
 
-def plot_heatmap(symmetric_matrix, cols, data_dirname, output_filename,
+def plot_clustermap(symmetric_matrix, cols, data_dirname, output_filename,
                  gc="orthogroup", analysis_type="intersection",
                  save_to="orthogroups_compare", title=None):
 
     symmetric_df = pd.DataFrame(symmetric_matrix, index=cols, columns=cols)
     plt.figure(figsize=(20, 14))
-    ax = sns.heatmap(symmetric_df, annot=True, fmt=".0f", annot_kws={"size": 15}, cmap="viridis")
+    # ax = sns.heatmap(symmetric_df, annot=True, fmt=".0f", annot_kws={"size": 15}, cmap="viridis")
+    ax = sns.clustermap(symmetric_df, annot=True, fmt=".0f", annot_kws={"size": 15}, cmap="viridis")
     ax.tick_params(axis='both', which='both', labelsize=15)
     ax.set_yticklabels(ax.get_yticklabels(), rotation=0, ha='right')
     cbar = ax.collections[0].colorbar
@@ -433,37 +434,37 @@ def main(datadir):
     intersection_right = get_arr_division(intersection_arr, intersection_arr + right_diff_arr)
     intersection_union = get_arr_division(intersection_arr, intersection_arr + left_diff_arr + right_diff_arr)
         
-    plot_heatmap(intersection_left, matrices, datadir, 
+    plot_clustermap(intersection_left, matrices, datadir, 
                  "orthogroup_intersection_percentage_left",
                  save_to="orthogroups_compare", 
                  title="Orthogroup intersection divided by the left group (%)")
 
-    plot_heatmap(intersection_right, matrices, datadir, 
+    plot_clustermap(intersection_right, matrices, datadir, 
                  "orthogroup_intersection_percentage_right",
                  save_to="orthogroups_compare", 
                  title="Orthogroup intersection divided by the right group (%)")
 
-    plot_heatmap(intersection_union, matrices, datadir, 
+    plot_clustermap(intersection_union, matrices, datadir, 
                  "orthogroup_intersection_percentage_union",
                  save_to="orthogroups_compare", 
                  title="Orthogroup intersection divided by the union (%)")
 
-    plot_heatmap(distinct_right_arr, matrices, datadir, 
+    plot_clustermap(distinct_right_arr, matrices, datadir, 
                  "right_distinct_orthogroups",
                  save_to="orthogroups_compare", 
                  title="Distinct orthogroups in the right group (%)")
     
-    plot_heatmap(overlap_right_arr, matrices, datadir, 
+    plot_clustermap(overlap_right_arr, matrices, datadir, 
                  "right_overlap_orthogroups",
                  save_to="orthogroups_compare", 
                  title="Overlap orthogroups in the right group (%)")
 
-    plot_heatmap(similarity_arr, matrices, datadir, 
+    plot_clustermap(similarity_arr, matrices, datadir, 
                  "orthogroups_similarity",
                  save_to="orthogroups_compare", 
                  title="Orthogroups similarity scores (%)")  
 
-    plot_heatmap(expected_arr, matrice_with_ogs_num, datadir, 
+    plot_clustermap(expected_arr, matrice_with_ogs_num, datadir, 
                  "orthogroups_expectation",
                  save_to="orthogroups_compare", 
                  title="Expected orthogroups")         
@@ -477,17 +478,17 @@ def main(datadir):
     unassigned_intersection_left, unassigned_intersection_right, \
     unassigned_intersection_union = gen_sets_analysis(matrices, unassgined_gens_matrix_sets)
     
-    plot_heatmap(unassigned_intersection_left, matrices, datadir, 
+    plot_clustermap(unassigned_intersection_left, matrices, datadir, 
                 "unassigned_gens_intersection_left",
                 save_to="unassigned_gens_compare", 
                 title="Unassigned gens intersection divided by the left group (%)") 
 
-    plot_heatmap(unassigned_intersection_right, matrices, datadir, 
+    plot_clustermap(unassigned_intersection_right, matrices, datadir, 
                 "unassigned_gens_intersection_right",
                 save_to="unassigned_gens_compare", 
                 title="Unassigned gens intersection divided by the right group (%)") 
     
-    plot_heatmap(unassigned_intersection_union, matrices, datadir, 
+    plot_clustermap(unassigned_intersection_union, matrices, datadir, 
                 "unassigned_gens_intersection_union",
                 save_to="unassigned_gens_compare", 
                 title="Unassigned gens intersection divided by the union (%)") 
@@ -517,17 +518,17 @@ def main(datadir):
     orthologue_intersection_left, orthologue_intersection_right, \
     orthologue_intersection_union = gen_sets_analysis(matrices, orthologue_sets_dict)
  
-    plot_heatmap(orthologue_intersection_left, matrices, datadir, 
+    plot_clustermap(orthologue_intersection_left, matrices, datadir, 
                 "orthologues_intersection_left",
                 save_to="orthologues_gens_compare", 
                 title="Orthologues intersection divided by the left group (%)") 
 
-    plot_heatmap(orthologue_intersection_right, matrices, datadir, 
+    plot_clustermap(orthologue_intersection_right, matrices, datadir, 
                 "orthologues_gens_intersection_left",
                 save_to="orthologues_gens_compare", 
                 title="Orthologues gens intersection divided by the right group (%)") 
     
-    plot_heatmap(orthologue_intersection_union, matrices, datadir, 
+    plot_clustermap(orthologue_intersection_union, matrices, datadir, 
                 "orthologues_gens_intersection_union",
                 save_to="orthologues_gens_compare", 
                 title="Orthologues gens intersection divided by the union (%)") 
@@ -536,5 +537,5 @@ def main(datadir):
 if __name__ == "__main__":
     
     args = sys.argv[1:]
-    datadir = "ExampleData0" if len(args) == 0 else args[-1]    
+    datadir = "ExampleData" if len(args) == 0 else args[-1]    
     main(datadir)

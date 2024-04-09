@@ -468,9 +468,12 @@ def ProcessArgs(prog_caller, args):
             print("Unrecognised argument: %s\n" % arg)
             util.Fail()
 
-    if options.gapextend is None:
+    if not options.gapextend and not options.gapopen:
+        print("@@@@@@@@@@@@@@@@@@@@@")
         options.gapextend = GetGapExtend(options.score_matrix)
-    if options.gapopen is None:
+        options.gapopen = GetGapOpen(options.score_matrix)
+    elif not options.gapopen and options.gapextend:
+        print("++++++++++++++++++++++++")
         options.gapopen = GetGapOpen(options.score_matrix, gapextend=options.gapextend)
 
     # set a default for number of algorithm threads
