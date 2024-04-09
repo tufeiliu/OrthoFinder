@@ -55,7 +55,8 @@ class Options(object):#
         self.root_from_previous = False
         self.score_matrix = "BLOSUM62"
         self.gapopen = None
-        self.gapextend = None
+        self.gapextend = None#
+        self.extended_filename = False
 
     def what(self):
         for k, v in self.__dict__.items():
@@ -467,17 +468,18 @@ def ProcessArgs(prog_caller, args):
             if options.score_matrix in diamond_cm_options and options.gapextend is None:
                 raise Exception("The gapopen penalty cannot be define before gapextend")
             options.gapopen = GetGapOpen(options.score_matrix, args.pop(0), options.gapextend)
-
+        elif arg == "-fn" or arg == "--extended-filename":
+            options.extended_filename = True
+            
         else:
             print("Unrecognised argument: %s\n" % arg)
             util.Fail()
 
     if not options.gapextend and not options.gapopen:
-        print("@@@@@@@@@@@@@@@@@@@@@")
         options.gapextend = GetGapExtend(options.score_matrix)
         options.gapopen = GetGapOpen(options.score_matrix)
+
     elif not options.gapopen and options.gapextend:
-        print("++++++++++++++++++++++++")
         options.gapopen = GetGapOpen(options.score_matrix, gapextend=options.gapextend)
 
     # set a default for number of algorithm threads

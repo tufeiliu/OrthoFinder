@@ -129,8 +129,9 @@ Directory and file management
 -------------------------------------------------------------------------------
 """               
                
-def GetDirectoryName(baseDirName, i, scorematrix, gapopen, gapextend):
-    if not scorematrix:
+def GetDirectoryName(baseDirName, i, scorematrix, gapopen, gapextend, extended_filename):
+    
+    if not extended_filename:
         if i == 0:
             return baseDirName + os.sep
         else:
@@ -151,26 +152,62 @@ def GetDirectoryName(baseDirName, i, scorematrix, gapopen, gapextend):
             return baseDirName + ("_%d" % i) + "_" + matrix_name + gap_penalty + os.sep
 
 """Call GetNameForNewWorkingDirectory before a call to CreateNewWorkingDirectory to find out what directory will be created"""
-def CreateNewWorkingDirectory(baseDirectoryName, qDate=True, scorematrix=None, gapopen=None, gapextend=None):
+def CreateNewWorkingDirectory(baseDirectoryName, 
+                              qDate=True, 
+                              scorematrix=None, 
+                              gapopen=None, 
+                              gapextend=None,
+                              extended_filename=False):
     dateStr = datetime.date.today().strftime("%b%d") if qDate else ""
     iAppend = 0
-    newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, iAppend, scorematrix, gapopen, gapextend)
+    newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, 
+                                        iAppend, 
+                                        scorematrix, 
+                                        gapopen, 
+                                        gapextend,
+                                        extended_filename)
     while os.path.exists(newDirectoryName):
         iAppend += 1
-        newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, iAppend, scorematrix, gapopen, gapextend)
+        newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, 
+                                            iAppend, 
+                                            scorematrix, 
+                                            gapopen, 
+                                            gapextend,
+                                            extended_filename)
     os.mkdir(newDirectoryName)
     return newDirectoryName
 
 # Unused    
-def CreateNewPairedDirectories(baseDirectoryName1, baseDirectoryName2, scorematrix=None):
+def CreateNewPairedDirectories(baseDirectoryName1, 
+                               baseDirectoryName2,                               
+                               scorematrix=None, 
+                               gapopen=None, 
+                               gapextend=None,
+                               extended_filename=False):
     dateStr = datetime.date.today().strftime("%b%d") 
     iAppend = 0
-    newDirectoryName1 = GetDirectoryName(baseDirectoryName1 + dateStr, iAppend, scorematrix)
-    newDirectoryName2 = GetDirectoryName(baseDirectoryName2 + dateStr, iAppend, scorematrix)
+    newDirectoryName1 = GetDirectoryName(baseDirectoryName1 + dateStr,                                             iAppend, 
+                                        scorematrix, 
+                                        gapopen, 
+                                        gapextend,
+                                        extended_filename)
+    newDirectoryName2 = GetDirectoryName(baseDirectoryName2 + dateStr,                                             iAppend, 
+                                        scorematrix, 
+                                        gapopen, 
+                                        gapextend,
+                                        extended_filename)
     while os.path.exists(newDirectoryName1) or os.path.exists(newDirectoryName2):
         iAppend += 1
-        newDirectoryName1 = GetDirectoryName(baseDirectoryName1 + dateStr, iAppend, scorematrix)
-        newDirectoryName2 = GetDirectoryName(baseDirectoryName2 + dateStr, iAppend, scorematrix)
+        newDirectoryName1 = GetDirectoryName(baseDirectoryName1 + dateStr,                                             iAppend, 
+                                            scorematrix, 
+                                            gapopen, 
+                                            gapextend,
+                                            extended_filename)
+        newDirectoryName2 = GetDirectoryName(baseDirectoryName2 + dateStr,                                             iAppend, 
+                                            scorematrix, 
+                                            gapopen, 
+                                            gapextend,
+                                            extended_filename)
     os.mkdir(newDirectoryName1)
     os.mkdir(newDirectoryName2)
     return newDirectoryName1, newDirectoryName2
