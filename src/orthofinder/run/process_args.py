@@ -165,7 +165,11 @@ def ProcessArgs(prog_caller, args):
     """
     if len(args) == 0 or args[0] == "--help" or args[0] == "help" or args[0] == "-h":
         helpinfo.PrintHelp(prog_caller)
-        util.Success() 
+        util.Success()
+
+    if args[0] == "-v" or args[0] == "--version":
+        print(f"orthofinder:v{__version__}")
+        util.Success()
 
     options = Options()
     fastaDir = None
