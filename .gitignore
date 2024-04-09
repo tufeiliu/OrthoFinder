@@ -5,4 +5,5 @@ ExampleData/OrthoFinder/
 **/orthofinder.egg-info/**
 **/__pycache__/**
 **/*.pyc
-
+myanalysis/
+fungi_dataset/
