@@ -36,7 +36,7 @@ try:
 except ImportError:
     import Queue as queue
 from collections import namedtuple
-from orthofinder import citation
+from orthofinder.citation import citation, print_citation
 from ..tools import tree
 from . import parallel_task_manager
 
@@ -380,14 +380,16 @@ def WriteCitation(d):
         outfile.write(citation)
 
 def PrintCitation(d=None):
-    if d is not None: WriteCitation(d)  
-    print ("\nCITATION:")  
-    print (" When publishing work that uses OrthoFinder please cite:")
-    print (" Emms D.M. & Kelly S. (2019), Genome Biology 20:238\n")   
+    if d is not None: WriteCitation(d)
+    print()
+    print(print_citation)  
+    # print ("\nCITATION:")  
+    # print (" When publishing work that uses OrthoFinder please cite:")
+    # print (" Emms D.M. & Kelly S. (2019), Genome Biology 20:238\n")   
 
-    print (" If you use the species tree in your work then please also cite:")
-    print (" Emms D.M. & Kelly S. (2017), MBE 34(12): 3267-3278")
-    print (" Emms D.M. & Kelly S. (2018), bioRxiv https://doi.org/10.1101/267914")
+    # print (" If you use the species tree in your work then please also cite:")
+    # print (" Emms D.M. & Kelly S. (2017), MBE 34(12): 3267-3278")
+    # print (" Emms D.M. & Kelly S. (2018), bioRxiv https://doi.org/10.1101/267914")
 
 def PrintUnderline(text, qHeavy=False):
     print(("\n" + text))

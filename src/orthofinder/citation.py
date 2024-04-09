@@ -1,18 +1,3 @@
-import multiprocessing as mp
-from importlib.metadata import version
-
-# Extract the version number defined in pyproject.toml
-__version__ = version(__name__)
-
-# Find the total number of threads on the host machine
-nThreadsDefault = mp.cpu_count()
-
-# MCL inflation parameter
-g_mclInflation = 1.2
-
-# Clade-specific genes
-orphan_genes_version = 2
-
 # Print citation
 print_citation = """
 CITATION:
@@ -83,4 +68,4 @@ doi:10.1371/journal.pone.0009490
 BLAST protein alignment:
 Altschul, S.F., Gish, W., Miller, W., Myers, E.W. & Lipman, D.J. Basic local
 alignment search tool (1990) J. Mol. Biol. 215:403-410
-"""    
+"""   
