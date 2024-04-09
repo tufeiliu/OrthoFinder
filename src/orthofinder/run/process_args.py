@@ -457,6 +457,10 @@ def ProcessArgs(prog_caller, args):
         elif arg == "-h" or arg == "--help":
             helpinfo.PrintHelp(prog_caller)
             util.Success()
+        
+        elif arg == "-sm" or arg == "--scoring-matrix":
+            helpinfo.PrintNotes(arg)
+            util.Success()
 
         elif arg == "--matrix" or arg == "--custom-matrix":
             options.score_matrix = GetScoreMatrix(args.pop(0))
@@ -468,9 +472,10 @@ def ProcessArgs(prog_caller, args):
             if options.score_matrix in diamond_cm_options and options.gapextend is None:
                 raise Exception("The gapopen penalty cannot be define before gapextend")
             options.gapopen = GetGapOpen(options.score_matrix, args.pop(0), options.gapextend)
+       
         elif arg == "-fn" or arg == "--extended-filename":
             options.extended_filename = True
-            
+
         else:
             print("Unrecognised argument: %s\n" % arg)
             util.Fail()
