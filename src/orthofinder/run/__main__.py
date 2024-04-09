@@ -41,8 +41,8 @@ if __name__ == "__main__":
     #     # should be very small as we never try to create many processes
     #     mp.set_start_method('spawn')
 
-    args = sys.argv[1:]
-    main(args)
+    # args = sys.argv[1:]
+    # main(args)
 
 
 from ..utils import parallel_task_manager, blast_file_processor, timeit, \

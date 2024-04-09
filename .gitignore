@@ -1,9 +1,9 @@
 .venv/
 .coverage
-benchmark/
+benchmark/*
 ExampleData/OrthoFinder/
 **/orthofinder.egg-info/**
 **/__pycache__/**
 **/*.pyc
-myanalysis/
+myanalysis/*
 fungi_dataset/
