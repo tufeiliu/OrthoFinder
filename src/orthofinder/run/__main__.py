@@ -397,7 +397,7 @@ def main(args=None):
                 options = process_args.CheckOptions(options, speciesInfoObj.speciesToUse)
                 seqsInfo = util.GetSeqsInfo(files.FileHandler.GetWorkingDirectory1_Read(), speciesInfoObj.speciesToUse, speciesInfoObj.nSpAll)
                 # Add genes to orthogroups
-                results_files = acc.RunSearch(options, speciesInfoObj, fn_diamond_db, prog_caller)
+                results_files = run_commands.RunSearch_accelerate(options, speciesInfoObj, fn_diamond_db, prog_caller)
 
                 # Clade-specific genes
                 speciesNamesDict = species_info.SpeciesNameDict(files.FileHandler.GetSpeciesIDsFN())

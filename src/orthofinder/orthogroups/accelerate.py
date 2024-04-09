@@ -39,61 +39,6 @@ def prepare_accelerate_database(input_dir, wd_list, nSpAll):
     return fn_diamond_db, q_hogs
 
 
-def RunSearch(options, speciessInfoObj, fn_diamond_db, prog_caller, q_one_query=False):
-    name_to_print = "BLAST" if options.search_program == "blast" else options.search_program
-    util.PrintUnderline("Running %s profiles search" % name_to_print)
-    commands, results_files = GetOrderedSearchCommands(speciessInfoObj, 
-                                                       fn_diamond_db, 
-                                                       options,
-                                                       prog_caller, 
-                                                       q_one_query=q_one_query, 
-                                                       threads=options.nBlast)
-    if q_one_query:
-        return_code = parallel_task_manager.RunCommand(commands[0], qPrintOnError=True)
-        if return_code != 0:
-            print("ERROR: DIAMOND search failed, see messages above")
-            util.Fail()
-        util.PrintTime("Done profiles search\n")
-        return results_files
-    program_caller.RunParallelCommands(options.nBlast, commands, qListOfList=False, q_print_on_error=True)
-    util.PrintTime("Done profiles search")
-    return results_files
-
-
-def GetOrderedSearchCommands(speciesInfoObj, diamond_db, options, prog_caller, q_one_query, threads=1):
-    """ Using the nSeq1 x nSeq2 as a rough estimate of the amount of work required for a given species-pair, returns the commands
-    ordered so that the commands predicted to take the longest come first. This allows the load to be balanced better when processing
-    the BLAST commands.
-    """
-    iSpeciesNew = list(range(speciesInfoObj.iFirstNewSpecies, speciesInfoObj.nSpAll))
-    if q_one_query:
-        wd = files.FileHandler.GetSpeciesSeqsDir()[0]
-        fn_single_fasta = "%sall_sequences.fa" % wd
-        with open(fn_single_fasta, 'w') as outfile:
-            for iFasta in iSpeciesNew:
-                with open(files.FileHandler.GetSpeciesFastaFN(iFasta), 'r') as infile:
-                    for line in infile:
-                        outfile.write(line)
-                    outfile.write("\n")
-        results = wd + "Blast_all_sequences.txt"
-        # commands = [prog_caller.GetSearchMethodCommand_Search(search_program, fn_single_fasta, diamond_db, results)]
-        commands = ["diamond blastp --ignore-warnings -d %s -q %s -o %s --more-sensitive -p %d --quiet -e 0.001 --compress 1" % (diamond_db, fn_single_fasta, results, threads)]
-        results_files = [results + ".gz"]
-    else:
-        commands = [prog_caller.GetSearchMethodCommand_Search(
-            options.search_program,
-            files.FileHandler.GetSpeciesFastaFN(iFasta),
-            diamond_db,
-            files.FileHandler.GetBlastResultsFN(iFasta, -1, qForCreation=True),
-            scorematrix=options.score_matrix, 
-            gapopen=options.gapopen, 
-            gapextend=options.gapextend)
-            for iFasta in iSpeciesNew
-        ]
-        results_files = [files.FileHandler.GetBlastResultsFN(iFasta, -1, qForCreation=True) + ".gz" for iFasta in iSpeciesNew]
-    return commands, results_files
-
-
 def ogs_from_diamond_results(fn_og_results_out, q_ignore_sub=False):
     """
     Get the OG based on the DIAMOND results
