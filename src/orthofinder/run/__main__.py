@@ -48,7 +48,7 @@ from ..utils import parallel_task_manager, blast_file_processor, timeit, \
 ptm_initialised = parallel_task_manager.ParallelTaskManager_singleton()
 
 import os                                       # Y
-os.environ["OPENBLAS_NUM_THREADS"] = "1"    # fix issue with numpy/openblas. Will mean that single threaded options aren't automatically parallelised 
+# os.environ["OPENBLAS_NUM_THREADS"] = "1"    # fix issue with numpy/openblas. Will mean that single threaded options aren't automatically parallelised 
 
 import sys                                      # Y
 import copy                                     # Y
@@ -81,16 +81,10 @@ from ..orthogroups import accelerate as acc
 from ..tools import astral, tree, mcl, trees_msa
 from ..gen_tree_inference import trees2ologs_of
 from . import process_args, check_dependencies, run_commands, species_info
-from orthofinder import orphan_genes_version, __version__
+from orthofinder import orphan_genes_version, __version__, __location__
 from ..comparative_genomics import orthologues
 from . import helpinfo
 
-# Get directory containing script/bundle
-if getattr(sys, 'frozen', False):
-    __location__ = os.path.split(sys.executable)[0]
-else:
-    __location__ = os.path.realpath(os.path.join(os.getcwd(), 
-                                    os.path.dirname(os.path.dirname(__file__))))
 
 configfile_location = os.path.join(__location__, "run")  
 max_int = sys.maxsize
@@ -108,21 +102,6 @@ sys.setrecursionlimit(10**6)
 # if sys.platform.startswith("linux"):
 #     with open(os.devnull, "w") as f:
 #         subprocess.call("taskset -p 0xffffffffffff %d" % os.getpid(), shell=True, stdout=f) 
-
-my_env = os.environ.copy()
-# use orthofinder supplied executables by preference
-my_env['PATH'] = os.path.join(__location__, 'bin:') + my_env['PATH']
-# Fix LD_LIBRARY_PATH when using pyinstaller 
-if getattr(sys, 'frozen', False):
-    if 'LD_LIBRARY_PATH_ORIG' in my_env:
-        my_env['LD_LIBRARY_PATH'] = my_env['LD_LIBRARY_PATH_ORIG']  
-    else:
-        my_env['LD_LIBRARY_PATH'] = ''  
-    if 'DYLD_LIBRARY_PATH_ORIG' in my_env:
-        my_env['DYLD_LIBRARY_PATH'] = my_env['DYLD_LIBRARY_PATH_ORIG']  
-    else:
-        my_env['DYLD_LIBRARY_PATH'] = ''
-
 
 
 """
@@ -286,7 +265,6 @@ def main(args=None):
         prog_caller = GetProgramCaller()
         options, fastaDir, continuationDir, resultsDir_nonDefault, pickleDir_nonDefault, user_specified_M = process_args.ProcessArgs(prog_caller, args)
         
-        print("")
         print(("OrthoFinder version %s Copyright (C) 2014 David Emms\n" % __version__))
         
         files.InitialiseFileHandler(options, fastaDir, continuationDir, resultsDir_nonDefault, pickleDir_nonDefault)     

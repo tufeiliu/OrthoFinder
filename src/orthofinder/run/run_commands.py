@@ -3,6 +3,8 @@ import subprocess
 import glob     
 import shutil
 from . import run_info
+from orthofinder import my_env
+import os
 
 def RunBlastDBCommand(command):
     capture = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=my_env, shell=True)
@@ -92,7 +94,7 @@ def CreateSearchDatabases(speciesInfoObj, options, prog_caller, q_unassigned_gen
         if options.search_program == "blast":
             command = " ".join(["makeblastdb", "-dbtype", "prot", "-in", fn_fasta, "-out", files.FileHandler.GetSpeciesDatabaseN(iSp)])
             util.PrintTime("Creating Blast database %d of %d" % (iSp + 1, len(iSpeciesToDo)))
-            run_commands.RunBlastDBCommand(command) 
+            RunBlastDBCommand(command) 
         else:
             command = prog_caller.GetSearchMethodCommand_DB(options.search_program, 
                                                             fn_fasta, 
