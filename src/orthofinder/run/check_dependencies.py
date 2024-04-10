@@ -1,6 +1,7 @@
 from ..utils import util, program_caller, files, parallel_task_manager
 from ..tools import trees_msa
 import os
+from orthofinder import __location__
 
 def CanRunBLAST():
     if parallel_task_manager.CanRunCommand("makeblastdb -help") and parallel_task_manager.CanRunCommand("blastp -help"):
@@ -139,9 +140,9 @@ def CanRunOrthologueDependencies(workingDir, qMSAGeneTrees, qPhyldog, qStopAfter
                 mafft_var = "MAFFT_BINARIES"
                 print("Trying OrthoFinder packaged version of MAFFT\n")
                 if mafft_var not in parallel_task_manager.my_env:
-                    parallel_task_manager.my_env[mafft_var] = os.path.join(parallel_task_manager.__location__, 'bin/mafft/libexec/')
+                    parallel_task_manager.my_env[mafft_var] = os.path.join(__location__, 'bin/mafft/libexec/')
                     parallel_task_manager.my_env["PATH"] = parallel_task_manager.my_env["PATH"] + ":" + \
-                                                           os.path.join(parallel_task_manager.__location__, 'bin/mafft/bin/')
+                                                           os.path.join(__location__, 'bin/mafft/bin/')
                     success, stdout, stderr, cmd = program_caller.TestMSAMethod(msa_method, d_deps_test)
             if not success:
                 print("ERROR: Cannot run MSA method '%s'" % msa_method)
