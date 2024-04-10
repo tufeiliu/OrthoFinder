@@ -49,19 +49,20 @@ from ..utils import util, files, parallel_task_manager, program_caller
 from ..orthogroups import accelerate, orthogroups_set
 from . import stats
 from orthofinder import nThreadsDefault as nThreads
+from orthofinder import my_env
 
 
 # Fix LD_LIBRARY_PATH when using pyinstaller 
-my_env = os.environ.copy()
-if getattr(sys, 'frozen', False):
-    if 'LD_LIBRARY_PATH_ORIG' in my_env:
-        my_env['LD_LIBRARY_PATH'] = my_env['LD_LIBRARY_PATH_ORIG']  
-    else:
-        my_env['LD_LIBRARY_PATH'] = ''  
-    if 'DYLD_LIBRARY_PATH_ORIG' in my_env:
-        my_env['DYLD_LIBRARY_PATH'] = my_env['DYLD_LIBRARY_PATH_ORIG']  
-    else:
-        my_env['DYLD_LIBRARY_PATH'] = ''     
+# my_env = os.environ.copy()
+# if getattr(sys, 'frozen', False):
+#     if 'LD_LIBRARY_PATH_ORIG' in my_env:
+#         my_env['LD_LIBRARY_PATH'] = my_env['LD_LIBRARY_PATH_ORIG']  
+#     else:
+#         my_env['LD_LIBRARY_PATH'] = ''  
+#     if 'DYLD_LIBRARY_PATH_ORIG' in my_env:
+#         my_env['DYLD_LIBRARY_PATH'] = my_env['DYLD_LIBRARY_PATH_ORIG']  
+#     else:
+#         my_env['DYLD_LIBRARY_PATH'] = ''     
         
 # ==============================================================================================================================
 
