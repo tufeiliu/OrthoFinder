@@ -32,6 +32,7 @@ import time
 import subprocess
 import multiprocessing as mp
 from queue import Queue
+from orthofinder import my_env 
 
 PY2 = sys.version_info <= (3,)
 from . import util, parallel_task_manager

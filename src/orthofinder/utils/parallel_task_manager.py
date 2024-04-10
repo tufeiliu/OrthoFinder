@@ -32,7 +32,7 @@ import traceback
 import subprocess
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, wait, as_completed
-
+from orthofinder import my_env
 try:
     import queue
 except ImportError:
@@ -46,28 +46,6 @@ except ImportError:
 
 
 PY2 = sys.version_info <= (3,)
-
-if getattr(sys, 'frozen', False):
-    __location__ = os.path.split(sys.executable)[0]
-else:
-    __location__ = os.path.realpath(os.path.join(os.getcwd(), 
-                                    os.path.dirname(os.path.dirname(__file__))))
-
-# use user's executables by preference over OrthoFinder's
-my_env = os.environ.copy()
-my_env['PATH'] = my_env['PATH'] + ":" + os.path.join(__location__, 'bin')
-
-# Fix LD_LIBRARY_PATH when using pyinstaller 
-if getattr(sys, 'frozen', False):
-    if 'LD_LIBRARY_PATH_ORIG' in my_env:
-        my_env['LD_LIBRARY_PATH'] = my_env['LD_LIBRARY_PATH_ORIG']  
-    else:
-        my_env['LD_LIBRARY_PATH'] = ''  
-    if 'DYLD_LIBRARY_PATH_ORIG' in my_env:
-        my_env['DYLD_LIBRARY_PATH'] = my_env['DYLD_LIBRARY_PATH_ORIG']  
-    else:
-        my_env['DYLD_LIBRARY_PATH'] = ''    
-
 
 def print_traceback(e):
     if PY2:
