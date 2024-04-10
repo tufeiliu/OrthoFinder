@@ -183,7 +183,6 @@ def DoOrthogroups(options, speciesInfoObj, seqsInfo, speciesNamesDict, speciesXM
         post_clustering_orthogroups(clustersFilename_pairs, speciesInfoObj, seqsInfo, speciesNamesDict, options, speciesXML)
     return clustersFilename_pairs
 
-
 def post_clustering_orthogroups(clustersFilename_pairs, speciesInfoObj, seqsInfo, speciesNamesDict, options, speciesXML, q_incremental=False):
     """
     Write OGs & statistics to results files, write Fasta files.

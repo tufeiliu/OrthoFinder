@@ -67,6 +67,9 @@ class __Files_new_dont_manually_create__(object):
     def CreateOutputDirFromStart_new(self, fasta_dir, base, 
                                      user_name = None, 
                                      old_wd_base_list=None,
+                                     search_program=None,
+                                     msa_program=None, 
+                                     tree_program=None,
                                      scorematrix=None,
                                      gapopen=None,
                                      gapextend=None,
@@ -82,6 +85,7 @@ class __Files_new_dont_manually_create__(object):
         """
         if user_name == None:
             self.rd1 = util.CreateNewWorkingDirectory(base + "Results_", 
+                                                      search_program=search_program,
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
@@ -89,6 +93,7 @@ class __Files_new_dont_manually_create__(object):
         else:
             self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, 
                                                       qDate=False,
+                                                      search_program=search_program,
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
@@ -105,13 +110,15 @@ class __Files_new_dont_manually_create__(object):
             with open(self.wd_current + "previous_wd.txt", 'w') as outfile: outfile.write(old_wd_base_list[0] + "\n")
             self.wd_base.extend(old_wd_base_list)
         self.wd_trees = self.wd_current
-        self.StartLog()
+        self.StartLog(search_program=search_program, msa_program=msa_program, tree_program=tree_program,
+                      scorematrix=scorematrix, gapopen=gapopen, gapextend=gapextend)
         
     # RefactorDS - PreviousFilesLocator
     def StartFromOrthogroupsOrSequenceSearch(self, wd_base_list, base, 
                                              clustersFilename_pairs=None, 
                                              user_name = None, 
                                              userSpeciesTree=None,
+                                             search_program=None,
                                              scorematrix=None,
                                              gapopen=None,
                                              gapextend=None,
@@ -126,13 +133,15 @@ class __Files_new_dont_manually_create__(object):
         self.wd_base = wd_base_list
         if clustersFilename_pairs != None: self.clustersFilename = clustersFilename_pairs[:-len("_id_pairs.txt")]
         if user_name == None:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_", 
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_",
+                                                      search_program=search_program, 
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
                                                       extended_filename=extended_filename)
         else:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, 
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name,
+                                                      search_program=search_program, 
                                                       qDate=False,
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
@@ -143,7 +152,7 @@ class __Files_new_dont_manually_create__(object):
         with open(self.rd1 + "Log.txt", 'w'):
             pass
         self.wd_trees = self.wd_current
-        self.StartLog()
+        self.StartLog(search_program=search_program, scorematrix=scorematrix, gapopen=gapopen, gapextend=gapextend)
     
     
     def StartFromTrees(self, 
@@ -154,6 +163,7 @@ class __Files_new_dont_manually_create__(object):
                        speciesTreeFN, 
                        qIsUSerSpeciesTree,
                        user_name=None,
+                       search_program=None,
                        scorematrix=None,
                        gapopen=None,
                        gapextend=None,
@@ -166,7 +176,8 @@ class __Files_new_dont_manually_create__(object):
         self.wd_base = wd1_list
         self.wd_trees = wd2
         if user_name == None:
-            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_", 
+            self.rd1 = util.CreateNewWorkingDirectory(base + "Results_",
+                                                      search_program=search_program, 
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
@@ -174,6 +185,7 @@ class __Files_new_dont_manually_create__(object):
         else:
             self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, 
                                                       qDate=False,
+                                                      search_program=search_program,
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
@@ -181,7 +193,7 @@ class __Files_new_dont_manually_create__(object):
         self.wd_current = self.rd1 + "WorkingDirectory/"
         os.mkdir(self.wd_current)
         self.clustersFilename = clustersFilename_pairs[:-len("_id_pairs.txt")]
-        self.StartLog()
+        self.StartLog(search_program=search_program, scorematrix=scorematrix, gapopen=gapopen, gapextend=gapextend)
         if not qIsUSerSpeciesTree:
             shutil.copy(speciesTreeFN, self.GetSpeciesTreeIDsRootedFN())
         self.WriteToLog("Species Tree: %s\n" % speciesTreeFN)
@@ -193,6 +205,7 @@ class __Files_new_dont_manually_create__(object):
             self.CreateOutputDirFromStart_new(fastaDir, base_dir, 
                                               user_name=options.name, 
                                               old_wd_base_list = wd1,
+                                              search_program=options.search_program,
                                               scorematrix=options.score_matrix,
                                               gapopen=options.gapopen,
                                               gapextend=options.gapextend,
@@ -201,6 +214,7 @@ class __Files_new_dont_manually_create__(object):
         elif options.qStartFromFasta:
             self.CreateOutputDirFromStart_new(fastaDir, base_dir, 
                                               user_name=options.name,
+                                              search_program=options.search_program,
                                               scorematrix=options.score_matrix,
                                               gapopen=options.gapopen,
                                               gapextend=options.gapextend,
@@ -211,6 +225,7 @@ class __Files_new_dont_manually_create__(object):
             self.StartFromOrthogroupsOrSequenceSearch(wd1, 
                                                       base_dir,
                                                       user_name=options.name,
+                                                      search_program=options.search_program,
                                                       scorematrix=options.score_matrix,
                                                       gapopen=options.gapopen,
                                                       gapextend=options.gapextend,
@@ -222,6 +237,7 @@ class __Files_new_dont_manually_create__(object):
                                                       base_dir,
                                                       clustersFilename_pairs, 
                                                       user_name=options.name,
+                                                      search_program=options.search_program,
                                                       scorematrix=options.score_matrix,
                                                       gapopen=options.gapopen,
                                                       gapextend=options.gapextend,
@@ -243,6 +259,7 @@ class __Files_new_dont_manually_create__(object):
                                 speciesTreeFN, 
                                 qIsUserSpeciesTree,
                                 user_name=options.name,
+                                search_program=options.search_program,
                                 scorematrix=options.score_matrix,
                                 gapopen=options.gapopen,
                                 gapextend=options.gapextend,
@@ -558,10 +575,26 @@ class __Files_new_dont_manually_create__(object):
         with open(self.rd1 + "Log.txt", 'a') as outfile:
             outfile.write(prepend + text)
     
-    def StartLog(self):
+    def StartLog(self, search_program=None, msa_program=None, tree_program=None, 
+                 scorematrix=None, gapopen=None, gapextend=None):
         self.WriteToLog("Started OrthoFinder version " + __version__ + "\n", True)
         text = "Command Line: " + " ".join(sys.argv) + "\n\n"
-        text += "WorkingDirectory_Base: %s\n" % self.wd_base[0]
+        
+        if search_program:
+            text += f"Search program: {search_program}\n"
+        if msa_program:
+            text += f"MSA program: {msa_program}\n"
+        if tree_program:
+            text += f"Tree program: {tree_program}\n"
+
+        if scorematrix:
+            text += f"Scoring matrix: {scorematrix}\n"
+        if gapextend:
+            text += f"Gap extend: {gapextend}\n"
+        if gapopen:
+            text += f"Gap open: {gapopen}\n"
+
+        text += "\nWorkingDirectory_Base: %s\n" % self.wd_base[0]
         self.WriteToLog(text)
         if self.clustersFilename != None:self.LogOGs()
     

@@ -129,7 +129,7 @@ Directory and file management
 -------------------------------------------------------------------------------
 """               
                
-def GetDirectoryName(baseDirName, i, scorematrix, gapopen, gapextend, extended_filename):
+def GetDirectoryName(baseDirName, i, search_program, scorematrix, gapopen, gapextend, extended_filename):
     
     if not extended_filename:
         if i == 0:
@@ -137,23 +137,29 @@ def GetDirectoryName(baseDirName, i, scorematrix, gapopen, gapextend, extended_f
         else:
             return baseDirName + ("_%d" % i) + os.sep
     else:
-        if os.path.isfile(scorematrix):
+        if scorematrix and os.path.isfile(scorematrix):
             matrix_name = os.path.basename(scorematrix).split(".")[0]
         else:
-            matrix_name = scorematrix
+            matrix_name = scorematrix if scorematrix else ""
 
         if gapopen and gapextend:
             gap_penalty = "-" + "-".join((gapopen, gapextend))
         else:
             gap_penalty = ""
-        if i == 0:
-            return baseDirName + "_" + matrix_name + gap_penalty + os.sep 
+        if len(matrix_name) != 0 or len(gap_penalty) != 0:
+            extension = matrix_name + gap_penalty + "-" + search_program
         else:
-            return baseDirName + ("_%d" % i) + "_" + matrix_name + gap_penalty + os.sep
+            extension = search_program
+
+        if i == 0:
+            return baseDirName + "_" + extension + os.sep 
+        else:
+            return baseDirName + ("_%d" % i) + "_" + extension + os.sep
 
 """Call GetNameForNewWorkingDirectory before a call to CreateNewWorkingDirectory to find out what directory will be created"""
 def CreateNewWorkingDirectory(baseDirectoryName, 
-                              qDate=True, 
+                              qDate=True,
+                              search_program=None, 
                               scorematrix=None, 
                               gapopen=None, 
                               gapextend=None,
@@ -161,7 +167,8 @@ def CreateNewWorkingDirectory(baseDirectoryName,
     dateStr = datetime.date.today().strftime("%b%d") if qDate else ""
     iAppend = 0
     newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, 
-                                        iAppend, 
+                                        iAppend,
+                                        search_program, 
                                         scorematrix, 
                                         gapopen, 
                                         gapextend,
@@ -170,6 +177,7 @@ def CreateNewWorkingDirectory(baseDirectoryName,
         iAppend += 1
         newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, 
                                             iAppend, 
+                                            search_program,
                                             scorematrix, 
                                             gapopen, 
                                             gapextend,
@@ -179,31 +187,40 @@ def CreateNewWorkingDirectory(baseDirectoryName,
 
 # Unused    
 def CreateNewPairedDirectories(baseDirectoryName1, 
-                               baseDirectoryName2,                               
+                               baseDirectoryName2,
+                               search_program=None,                               
                                scorematrix=None, 
                                gapopen=None, 
                                gapextend=None,
                                extended_filename=False):
     dateStr = datetime.date.today().strftime("%b%d") 
     iAppend = 0
-    newDirectoryName1 = GetDirectoryName(baseDirectoryName1 + dateStr,                                             iAppend, 
+    newDirectoryName1 = GetDirectoryName(baseDirectoryName1 + dateStr,
+                                        iAppend,
+                                        search_program, 
                                         scorematrix, 
                                         gapopen, 
                                         gapextend,
                                         extended_filename)
-    newDirectoryName2 = GetDirectoryName(baseDirectoryName2 + dateStr,                                             iAppend, 
+    newDirectoryName2 = GetDirectoryName(baseDirectoryName2 + dateStr, 
+                                        iAppend,
+                                        search_program, 
                                         scorematrix, 
                                         gapopen, 
                                         gapextend,
                                         extended_filename)
     while os.path.exists(newDirectoryName1) or os.path.exists(newDirectoryName2):
         iAppend += 1
-        newDirectoryName1 = GetDirectoryName(baseDirectoryName1 + dateStr,                                             iAppend, 
+        newDirectoryName1 = GetDirectoryName(baseDirectoryName1 + dateStr, 
+                                            iAppend,
+                                            search_program, 
                                             scorematrix, 
                                             gapopen, 
                                             gapextend,
                                             extended_filename)
-        newDirectoryName2 = GetDirectoryName(baseDirectoryName2 + dateStr,                                             iAppend, 
+        newDirectoryName2 = GetDirectoryName(baseDirectoryName2 + dateStr, 
+                                            iAppend, 
+                                            search_program,
                                             scorematrix, 
                                             gapopen, 
                                             gapextend,

@@ -53,7 +53,7 @@ class Options(object):#
         self.save_space = False  # On complete, have only one orthologs file per species
         self.v2_scores = False
         self.root_from_previous = False
-        self.score_matrix = "BLOSUM62"
+        self.score_matrix = None
         self.gapopen = None
         self.gapextend = None#
         self.extended_filename = False
@@ -480,12 +480,16 @@ def ProcessArgs(prog_caller, args):
             print("Unrecognised argument: %s\n" % arg)
             util.Fail()
 
-    if not options.gapextend and not options.gapopen:
-        options.gapextend = GetGapExtend(options.score_matrix)
-        options.gapopen = GetGapOpen(options.score_matrix)
+    if "diamond" in options.search_program and not options.score_matrix:
+        options.score_matrix = "BLOSUM62"
+        
+    if options.score_matrix:
+        if not options.gapextend and not options.gapopen:
+            options.gapextend = GetGapExtend(options.score_matrix)
+            options.gapopen = GetGapOpen(options.score_matrix)
 
-    elif not options.gapopen and options.gapextend:
-        options.gapopen = GetGapOpen(options.score_matrix, gapextend=options.gapextend)
+        elif not options.gapopen and options.gapextend:
+            options.gapopen = GetGapOpen(options.score_matrix, gapextend=options.gapextend)
 
     # set a default for number of algorithm threads
     if options.nProcessAlg is None:
@@ -554,7 +558,8 @@ def ProcessArgs(prog_caller, args):
         print("ERROR: Search program (%s) not configured in config.json file" % options.search_program)
         util.Fail()
 
-    util.PrintTime("Starting OrthoFinder %s" % __version__)    
+    print()
+    util.PrintTime("Starting OrthoFinder v%s" % __version__)    
     print("%d thread(s) for highly parallel tasks (BLAST searches etc.)" % options.nBlast)
     print("%d thread(s) for OrthoFinder algorithm\n" % options.nProcessAlg)
 
