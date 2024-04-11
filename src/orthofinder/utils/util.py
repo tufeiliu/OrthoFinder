@@ -129,7 +129,8 @@ Directory and file management
 -------------------------------------------------------------------------------
 """               
                
-def GetDirectoryName(baseDirName, i, search_program, scorematrix, gapopen, gapextend, extended_filename):
+def GetDirectoryName(baseDirName, i, search_program, msa_program, tree_program,
+                     scorematrix, gapopen, gapextend, extended_filename):
     
     if not extended_filename:
         if i == 0:
@@ -146,10 +147,11 @@ def GetDirectoryName(baseDirName, i, search_program, scorematrix, gapopen, gapex
             gap_penalty = "-" + "-".join((gapopen, gapextend))
         else:
             gap_penalty = ""
+        
         if len(matrix_name) != 0 or len(gap_penalty) != 0:
-            extension = matrix_name + gap_penalty + "-" + search_program
+            extension = matrix_name + gap_penalty + "-" + "-".join((search_program, msa_program, tree_program))
         else:
-            extension = search_program
+            extension = "-".join((search_program, msa_program, tree_program))
 
         if i == 0:
             return baseDirName + "_" + extension + os.sep 
@@ -159,7 +161,9 @@ def GetDirectoryName(baseDirName, i, search_program, scorematrix, gapopen, gapex
 """Call GetNameForNewWorkingDirectory before a call to CreateNewWorkingDirectory to find out what directory will be created"""
 def CreateNewWorkingDirectory(baseDirectoryName, 
                               qDate=True,
-                              search_program=None, 
+                              search_program=None,
+                              msa_program=None,
+                              tree_program=None, 
                               scorematrix=None, 
                               gapopen=None, 
                               gapextend=None,
@@ -169,7 +173,9 @@ def CreateNewWorkingDirectory(baseDirectoryName,
     newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, 
                                         iAppend,
                                         search_program, 
-                                        scorematrix, 
+                                        msa_program,
+                                        tree_program, 
+                                        scorematrix,
                                         gapopen, 
                                         gapextend,
                                         extended_filename)
@@ -178,6 +184,8 @@ def CreateNewWorkingDirectory(baseDirectoryName,
         newDirectoryName = GetDirectoryName(baseDirectoryName + dateStr, 
                                             iAppend, 
                                             search_program,
+                                            msa_program,
+                                            tree_program, 
                                             scorematrix, 
                                             gapopen, 
                                             gapextend,
@@ -188,7 +196,9 @@ def CreateNewWorkingDirectory(baseDirectoryName,
 # Unused    
 def CreateNewPairedDirectories(baseDirectoryName1, 
                                baseDirectoryName2,
-                               search_program=None,                               
+                               search_program=None, 
+                               msa_program=None, 
+                               tree_program=None,                              
                                scorematrix=None, 
                                gapopen=None, 
                                gapextend=None,
@@ -197,14 +207,18 @@ def CreateNewPairedDirectories(baseDirectoryName1,
     iAppend = 0
     newDirectoryName1 = GetDirectoryName(baseDirectoryName1 + dateStr,
                                         iAppend,
-                                        search_program, 
+                                        search_program,
+                                        msa_program,
+                                        tree_program, 
                                         scorematrix, 
                                         gapopen, 
                                         gapextend,
                                         extended_filename)
     newDirectoryName2 = GetDirectoryName(baseDirectoryName2 + dateStr, 
                                         iAppend,
-                                        search_program, 
+                                        search_program,
+                                        msa_program,
+                                        tree_program,  
                                         scorematrix, 
                                         gapopen, 
                                         gapextend,
@@ -213,7 +227,9 @@ def CreateNewPairedDirectories(baseDirectoryName1,
         iAppend += 1
         newDirectoryName1 = GetDirectoryName(baseDirectoryName1 + dateStr, 
                                             iAppend,
-                                            search_program, 
+                                            search_program,
+                                            msa_program,
+                                            tree_program,  
                                             scorematrix, 
                                             gapopen, 
                                             gapextend,
@@ -221,6 +237,8 @@ def CreateNewPairedDirectories(baseDirectoryName1,
         newDirectoryName2 = GetDirectoryName(baseDirectoryName2 + dateStr, 
                                             iAppend, 
                                             search_program,
+                                            msa_program,
+                                            tree_program,  
                                             scorematrix, 
                                             gapopen, 
                                             gapextend,

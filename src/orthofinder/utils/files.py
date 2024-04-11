@@ -86,6 +86,8 @@ class __Files_new_dont_manually_create__(object):
         if user_name == None:
             self.rd1 = util.CreateNewWorkingDirectory(base + "Results_", 
                                                       search_program=search_program,
+                                                      msa_program=msa_program,
+                                                      tree_program=tree_program,
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
@@ -94,6 +96,8 @@ class __Files_new_dont_manually_create__(object):
             self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, 
                                                       qDate=False,
                                                       search_program=search_program,
+                                                      msa_program=msa_program,
+                                                      tree_program=tree_program,
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
@@ -119,6 +123,8 @@ class __Files_new_dont_manually_create__(object):
                                              user_name = None, 
                                              userSpeciesTree=None,
                                              search_program=None,
+                                             msa_program=None, 
+                                             tree_program=None,
                                              scorematrix=None,
                                              gapopen=None,
                                              gapextend=None,
@@ -134,7 +140,9 @@ class __Files_new_dont_manually_create__(object):
         if clustersFilename_pairs != None: self.clustersFilename = clustersFilename_pairs[:-len("_id_pairs.txt")]
         if user_name == None:
             self.rd1 = util.CreateNewWorkingDirectory(base + "Results_",
-                                                      search_program=search_program, 
+                                                      search_program=search_program,
+                                                      msa_program=msa_program,
+                                                      tree_program=tree_program, 
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
@@ -144,6 +152,8 @@ class __Files_new_dont_manually_create__(object):
                                                       search_program=search_program, 
                                                       qDate=False,
                                                       scorematrix=scorematrix,
+                                                      msa_program=msa_program,
+                                                      tree_program=tree_program, 
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
                                                       extended_filename=extended_filename)
@@ -152,7 +162,8 @@ class __Files_new_dont_manually_create__(object):
         with open(self.rd1 + "Log.txt", 'w'):
             pass
         self.wd_trees = self.wd_current
-        self.StartLog(search_program=search_program, scorematrix=scorematrix, gapopen=gapopen, gapextend=gapextend)
+        self.StartLog(search_program=search_program, msa_program=msa_program, tree_program=tree_program,
+                      scorematrix=scorematrix, gapopen=gapopen, gapextend=gapextend)
     
     
     def StartFromTrees(self, 
@@ -164,6 +175,8 @@ class __Files_new_dont_manually_create__(object):
                        qIsUSerSpeciesTree,
                        user_name=None,
                        search_program=None,
+                       msa_program=None,
+                       tree_program=None,
                        scorematrix=None,
                        gapopen=None,
                        gapextend=None,
@@ -178,6 +191,8 @@ class __Files_new_dont_manually_create__(object):
         if user_name == None:
             self.rd1 = util.CreateNewWorkingDirectory(base + "Results_",
                                                       search_program=search_program, 
+                                                      msa_program=msa_program,
+                                                      tree_program=tree_program,
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
@@ -186,6 +201,8 @@ class __Files_new_dont_manually_create__(object):
             self.rd1 = util.CreateNewWorkingDirectory(base + "Results_" + user_name, 
                                                       qDate=False,
                                                       search_program=search_program,
+                                                      msa_program=msa_program,
+                                                      tree_program=tree_program,
                                                       scorematrix=scorematrix,
                                                       gapopen=gapopen,
                                                       gapextend=gapextend,
@@ -193,7 +210,8 @@ class __Files_new_dont_manually_create__(object):
         self.wd_current = self.rd1 + "WorkingDirectory/"
         os.mkdir(self.wd_current)
         self.clustersFilename = clustersFilename_pairs[:-len("_id_pairs.txt")]
-        self.StartLog(search_program=search_program, scorematrix=scorematrix, gapopen=gapopen, gapextend=gapextend)
+        self.StartLog(search_program=search_program, msa_program=msa_program, tree_program=tree_program,
+                      scorematrix=scorematrix, gapopen=gapopen, gapextend=gapextend)
         if not qIsUSerSpeciesTree:
             shutil.copy(speciesTreeFN, self.GetSpeciesTreeIDsRootedFN())
         self.WriteToLog("Species Tree: %s\n" % speciesTreeFN)
@@ -206,6 +224,8 @@ class __Files_new_dont_manually_create__(object):
                                               user_name=options.name, 
                                               old_wd_base_list = wd1,
                                               search_program=options.search_program,
+                                              msa_program=options.msa_program,
+                                              tree_program=options.tree_program,
                                               scorematrix=options.score_matrix,
                                               gapopen=options.gapopen,
                                               gapextend=options.gapextend,
@@ -216,6 +236,8 @@ class __Files_new_dont_manually_create__(object):
                                               user_name=options.name,
                                               search_program=options.search_program,
                                               scorematrix=options.score_matrix,
+                                              msa_program=options.msa_program,
+                                              tree_program=options.tree_program,
                                               gapopen=options.gapopen,
                                               gapextend=options.gapextend,
                                               extended_filename=options.extended_filename)
@@ -226,6 +248,8 @@ class __Files_new_dont_manually_create__(object):
                                                       base_dir,
                                                       user_name=options.name,
                                                       search_program=options.search_program,
+                                                      msa_program=options.msa_program,
+                                                      tree_program=options.tree_program,
                                                       scorematrix=options.score_matrix,
                                                       gapopen=options.gapopen,
                                                       gapextend=options.gapextend,
@@ -238,6 +262,8 @@ class __Files_new_dont_manually_create__(object):
                                                       clustersFilename_pairs, 
                                                       user_name=options.name,
                                                       search_program=options.search_program,
+                                                      msa_program=options.msa_program,
+                                                      tree_program=options.tree_program,
                                                       scorematrix=options.score_matrix,
                                                       gapopen=options.gapopen,
                                                       gapextend=options.gapextend,
@@ -260,6 +286,8 @@ class __Files_new_dont_manually_create__(object):
                                 qIsUserSpeciesTree,
                                 user_name=options.name,
                                 search_program=options.search_program,
+                                msa_program=options.msa_program,
+                                tree_program=options.tree_program,
                                 scorematrix=options.score_matrix,
                                 gapopen=options.gapopen,
                                 gapextend=options.gapextend,
@@ -534,7 +562,7 @@ class __Files_new_dont_manually_create__(object):
             return d
         else:
             raise NotImplemented() 
-            
+
     def GetOGsReconTreeFN(self, iOG):
         return self.rd1 + "Resolved_Gene_Trees/OG%07d_tree.txt" % iOG
             
@@ -577,6 +605,7 @@ class __Files_new_dont_manually_create__(object):
     
     def StartLog(self, search_program=None, msa_program=None, tree_program=None, 
                  scorematrix=None, gapopen=None, gapextend=None):
+                 
         self.WriteToLog("Started OrthoFinder version " + __version__ + "\n", True)
         text = "Command Line: " + " ".join(sys.argv) + "\n\n"
         
