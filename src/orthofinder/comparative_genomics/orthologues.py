@@ -42,8 +42,7 @@ except ImportError:
 
 from ..tools import tree, wrapper_phyldog, stag, stride, trees_msa, dendroblast
 from ..tools import mcl as MCL
-from ..gen_tree_inference import trees2ologs_dlcpar, trees2ologs_of
-from ..utils import blast_file_processor as BlastFileProcessor
+from ..gene_tree_inference import trees2ologs_dlcpar, trees2ologs_of
 
 from ..utils import util, files, parallel_task_manager, program_caller
 from ..orthogroups import accelerate, orthogroups_set
@@ -51,53 +50,6 @@ from . import stats
 from orthofinder import nThreadsDefault as nThreads
 from orthofinder import my_env
 
-
-# Fix LD_LIBRARY_PATH when using pyinstaller 
-# my_env = os.environ.copy()
-# if getattr(sys, 'frozen', False):
-#     if 'LD_LIBRARY_PATH_ORIG' in my_env:
-#         my_env['LD_LIBRARY_PATH'] = my_env['LD_LIBRARY_PATH_ORIG']  
-#     else:
-#         my_env['LD_LIBRARY_PATH'] = ''  
-#     if 'DYLD_LIBRARY_PATH_ORIG' in my_env:
-#         my_env['DYLD_LIBRARY_PATH'] = my_env['DYLD_LIBRARY_PATH_ORIG']  
-#     else:
-#         my_env['DYLD_LIBRARY_PATH'] = ''     
-        
-# ==============================================================================================================================
-
-def lil_min(M):
-    n = M.shape[0]
-    mins = np.ones((n, 1), dtype = np.float64) * 9e99
-    for kRow in range(n):
-        values=M.getrowview(kRow)
-        if values.nnz == 0:
-            continue
-        mins[kRow] = min(values.data[0])
-    return mins 
-
-def lil_max(M):
-    n = M.shape[0]
-    maxes = np.zeros((n, 1), dtype = np.float64)
-    for kRow in range(n):
-        values=M.getrowview(kRow)
-        if values.nnz == 0:
-            continue
-        maxes[kRow] = max(values.data[0])
-    return maxes
-
-def lil_minmax(M):
-    n = M.shape[0]
-    mins = np.ones((n, 1), dtype = np.float64) * 9e99
-    maxes = np.zeros((n, 1), dtype = np.float64)
-    for kRow in range(n):
-        values=M.getrowview(kRow)
-        if values.nnz == 0:
-            continue
-        mins[kRow] = min(values.data[0])
-        maxes[kRow] = max(values.data[0])
-    return mins, maxes
- 
    
 # ==============================================================================================================================    
 # Species trees for two- & three-species analyses
@@ -120,45 +72,6 @@ def GetSpeciesTreeRoot_TwoTaxa(taxa):
     t = tree.Tree("(%s,%s);" % (taxa[0], taxa[1]))  
     t.write(outfile=speciesTreeFN_ids)
     return speciesTreeFN_ids
-    
-# ==============================================================================================================================      
-# DendroBlast   
-
-def Worker_OGMatrices_ReadBLASTAndUpdateDistances(cmd_queue, worker_status_queue, iWorker, ogMatrices, nGenes, seqsInfo,
-                                                  blastDir_list, ogsPerSpecies, qDoubleBlast):
-    speciesToUse = seqsInfo.speciesToUse
-    with np.errstate(divide='ignore'):
-        while True:
-            try:
-                iiSp, sp1, nSeqs_sp1 = cmd_queue.get(True, 1)
-                worker_status_queue.put(("start", iWorker, iiSp))
-                Bs = [BlastFileProcessor.GetBLAST6Scores(seqsInfo, blastDir_list, sp1, sp2,
-                                                         qExcludeSelfHits = False, qDoubleBlast=qDoubleBlast)
-                      for sp2 in speciesToUse]
-                mins = np.ones((nSeqs_sp1, 1), dtype=np.float64)*9e99 
-                maxes = np.zeros((nSeqs_sp1, 1), dtype=np.float64)
-                for B in Bs:
-                    m0, m1 = lil_minmax(B)
-                    mins = np.minimum(mins, m0)
-                    maxes = np.maximum(maxes, m1)
-                maxes_inv = 1./maxes
-                for jjSp, B  in enumerate(Bs):
-                    for og, m in zip(ogsPerSpecies, ogMatrices):
-                        for gi, i in og[iiSp]:
-                            for gj, j in og[jjSp]:
-                                    m[i][j] = 0.5*max(B[gi.iSeq, gj.iSeq], mins[gi.iSeq]) * maxes_inv[gi.iSeq]
-                del Bs, B, mins, maxes, m0, m1, maxes_inv    # significantly reduces RAM usage
-                worker_status_queue.put(("finish", iWorker, iiSp))
-            except queue.Empty:
-                worker_status_queue.put(("empty", iWorker, None))
-                return 
-
-def GetRAMErrorText():
-    text = "ERROR: The computer ran out of RAM and killed OrthoFinder processes\n"
-    text += "Try using a computer with more RAM. If you used the '-a' option\n"
-    text += "it may be possible to complete the run by removing this option."
-    return text
-                
 
 # ==============================================================================================================================      
 # Main
