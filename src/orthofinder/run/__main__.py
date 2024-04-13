@@ -30,6 +30,7 @@ from __future__ import absolute_import
 # first import parallel task manager to minimise RAM overhead for small processes
 import multiprocessing as mp                    # optional  (problems on OpenBSD)
 import platform                                 # Y
+import sys                                      # Y
 
 if __name__ == "__main__":
     if platform.system() == "Darwin":
@@ -41,7 +42,6 @@ if __name__ == "__main__":
     #     # should be very small as we never try to create many processes
     #     mp.set_start_method('spawn')
 
-
 from ..utils import parallel_task_manager, blast_file_processor, timeit, \
     files, util, matrices, program_caller, split_ortholog_files, fasta_processor
 
@@ -50,7 +50,7 @@ ptm_initialised = parallel_task_manager.ParallelTaskManager_singleton()
 import os                                       # Y
 # os.environ["OPENBLAS_NUM_THREADS"] = "1"    # fix issue with numpy/openblas. Will mean that single threaded options aren't automatically parallelised 
 
-import sys                                      # Y
+
 import copy                                     # Y
 import subprocess                               # Y
 import glob                                     # Y
@@ -415,3 +415,7 @@ def main(args=None):
     finally:
         ptm = parallel_task_manager.ParallelTaskManager_singleton()
         ptm.Stop()
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    main(args)
