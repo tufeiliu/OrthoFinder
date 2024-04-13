@@ -473,7 +473,7 @@ def ProcessArgs(prog_caller, args):
                 raise Exception("The gapopen penalty cannot be define before gapextend")
             options.gapopen = GetGapOpen(options.score_matrix, args.pop(0), options.gapextend)
        
-        elif arg == "-fn" or arg == "--extended-filename":
+        elif arg == "-efn" or arg == "--extended-filename":
             options.extended_filename = True
 
         else:

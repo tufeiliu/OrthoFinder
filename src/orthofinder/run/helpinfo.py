@@ -50,7 +50,7 @@ def PrintHelp(prog_caller):
     print(" -n <txt>                Name to append to the results directory")  
     print(" -o <txt>                Non-default results directory")  
     print(" -h                      Print this help text")
-    print(" -fn                     Extend the output directory name with the name of the scoring matrix")
+    print(" -efn                     Extend the output directory name with the name of the scoring matrix")
     print(" -sm                     Print the usage of a user-specified scoring matrix")
     print(" --matrix <txt>          Scoring matrix allowed by DIAMOND")
     print(" --custom-matrix <txt>   Custom scoring matrix")
