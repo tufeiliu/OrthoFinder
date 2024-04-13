@@ -11,3 +11,4 @@ fungi_dataset*/
 dist*/
 *tar.gz
 *_cache/
+*egg-info/
