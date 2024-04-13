@@ -605,10 +605,10 @@ class __Files_new_dont_manually_create__(object):
     
     def StartLog(self, search_program=None, msa_program=None, tree_program=None, 
                  scorematrix=None, gapopen=None, gapextend=None):
-                 
+
         self.WriteToLog("Started OrthoFinder version " + __version__ + "\n", True)
         text = "Command Line: " + " ".join(sys.argv) + "\n\n"
-        
+
         if search_program:
             text += f"Search program: {search_program}\n"
         if msa_program:
