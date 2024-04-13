@@ -1,9 +1,13 @@
 .venv/
 .coverage
-benchmark/*
+benchmark/
 ExampleData/OrthoFinder/
 **/orthofinder.egg-info/**
 **/__pycache__/**
 **/*.pyc
-myanalysis/*
-fungi_dataset/
+myanalysis/
+mmseqs*/*
+fungi_dataset*/
+dist*/
+*tar.gz
+*_cache/
