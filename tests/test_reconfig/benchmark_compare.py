@@ -12,34 +12,6 @@ import multiprocessing
 import copy
 
 
-def plot_heatmap(symmetric_matrix, cols, data_dirname, output_filename,
-                 gc="orthogroup", analysis_type="intersection",
-                 save_to="orthogroups_compare", title=None):
-
-    symmetric_df = pd.DataFrame(symmetric_matrix, index=cols, columns=cols)
-    plt.figure(figsize=(20, 14))
-    ax = sns.heatmap(symmetric_df, annot=True, fmt=".0f", annot_kws={"size": 15}, cmap="viridis")
-    ax.tick_params(axis='both', which='both', labelsize=15)
-    ax.set_yticklabels(ax.get_yticklabels(), rotation=0, ha='right')
-    cbar = ax.collections[0].colorbar
-    
-    cbar.formatter.set_powerlimits((0, 0))
-    cbar.ax.tick_params(labelsize=15)
-    cbar.update_ticks()
-    if not title:
-        plt.title(f"{gc}: {analysis_type} %", fontsize = 20)
-    else:
-        plt.title(title, fontsize = 20)
-    output_dir = pathlib.Path.cwd() / "_".join((data_dirname, save_to))
-
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir, exist_ok=True)
-    
-    output_path = output_dir / f"{output_filename}.png"
-    plt.savefig(output_path)
-    plt.close()
-
-
 def compare_diff(left_sets, right_sets):
 
     distinct_orthogroups = set()
@@ -166,17 +138,20 @@ def create_unassgined_gens_matrix_sets(file_dict):
     return unassigned_gens_matrix_sets
 
 
-def obtain_ogs_datafiles(datadir):
+def obtain_ogs_datafiles(cwd, datadir):
 
-    orthofinder_outputs = pathlib.Path.cwd() / datadir / "OrthoFinder"
-    species_fasta = pathlib.Path.cwd() / datadir
+    orthofinder_outputs = cwd / datadir / "OrthoFinder"
+    species_fasta = cwd / datadir
 
     orthogroup_file_dict = {}
     unassigned_gens_file_dict = {}
     orthologue_file_dict = {}
     for output_dir in orthofinder_outputs.iterdir():
-        output_dir_name = output_dir.name 
-        output_matrix_result = output_dir_name.split("_")[-1]
+        output_dir_name = output_dir.name
+        if "blast_gz" not in output_dir_name:
+            output_matrix_result = output_dir_name.split("_")[-1]
+        else:
+             output_matrix_result = "_".join(output_dir_name.split("_")[-2:])
         orthologue_file_dict[output_matrix_result] = []
         orthogroup_file_dict[output_matrix_result] = None
         unassigned_gens_file_dict[output_matrix_result] = None
@@ -281,10 +256,10 @@ def create_ndarray(ordered_output_dict, matrices):
 
     return val_arr
 
-def orthogroups_analysis(datadir):
+def orthogroups_analysis(cwd, datadir, benchmark):
 
-    orthogroup_file_dict, _, _ = obtain_ogs_datafiles(datadir)
-    orthogroup_file_dict_orig, _, _ = obtain_ogs_datafiles("benchmark")
+    orthogroup_file_dict, _, _ = obtain_ogs_datafiles(cwd, datadir)
+    orthogroup_file_dict_orig, _, _ = obtain_ogs_datafiles(benchmark, datadir)
     orthogroup_file_dict.update(orthogroup_file_dict_orig)
     orthogroup_sets_dict = {}
     with multiprocessing.Pool() as pool1:
@@ -326,10 +301,10 @@ def orthogroups_analysis(datadir):
     return  comparison_stats
 
 
-def unassigned_gens_analysis(datadir):    
+def unassigned_gens_analysis(cwd, datadir, benchmark):    
     
-    _, unassigned_gens_file_dict, _ = obtain_ogs_datafiles(datadir)
-    _, unassigned_gens_file_dict_orig, _ = obtain_ogs_datafiles("benchmark")
+    _, unassigned_gens_file_dict, _ = obtain_ogs_datafiles(cwd, datadir)
+    _, unassigned_gens_file_dict_orig, _ = obtain_ogs_datafiles(benchmark, datadir)
     unassigned_gens_file_dict.update(unassigned_gens_file_dict_orig)
 
     unassgined_gens_matrix_sets = create_unassgined_gens_matrix_sets(unassigned_gens_file_dict)
@@ -338,10 +313,10 @@ def unassigned_gens_analysis(datadir):
     return comparison_stats
 
 
-def orthologues_analysis(datadir):
+def orthologues_analysis(cwd, datadir, benchmark):
 
-    _, _, orthologue_file_dict = obtain_ogs_datafiles(datadir)
-    _, _, orthologue_file_dict_orig = obtain_ogs_datafiles("benchmark")
+    _, _, orthologue_file_dict = obtain_ogs_datafiles(cwd, datadir)
+    _, _, orthologue_file_dict_orig = obtain_ogs_datafiles(benchmark, datadir)
     orthologue_file_dict.update(orthologue_file_dict_orig)
 
     items3 = []
@@ -371,7 +346,9 @@ def orthologues_analysis(datadir):
 if __name__ == "__main__":
     
     args = sys.argv[1:]
-    datadir = "ExampleData" if len(args) == 0 else args[-1]    
-    orthogroups_comparison_stats = orthogroups_analysis(datadir)
-    unassigned_gens_comparison_stats = unassigned_gens_analysis(datadir)
-    orthologues_comparison_stats = orthologues_analysis(datadir)
+    datadir = "ExampleData" if len(args) == 0 else args[-1]
+    path_to_benchmark = pathlib.Path(r"/home/yiliu/benchmark/OrthoFinder/") 
+    cwd = pathlib.Path.cwd() 
+    orthogroups_comparison_stats = orthogroups_analysis(cwd, datadir, path_to_benchmark)
+    unassigned_gens_comparison_stats = unassigned_gens_analysis(cwd, datadir, path_to_benchmark)
+    orthologues_comparison_stats = orthologues_analysis(cwd, datadir, path_to_benchmark)
