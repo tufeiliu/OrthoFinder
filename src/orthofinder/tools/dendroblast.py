@@ -9,7 +9,7 @@ try:
 except ImportError:
     import Queue as queue
 
-from ..tools import stag
+from . import stag, tree
 from ..utils import util, files, parallel_task_manager, program_caller
 from ..utils import blast_file_processor as BlastFileProcessor
 
@@ -333,4 +333,27 @@ def lil_minmax(M):
         mins[kRow] = min(values.data[0])
         maxes[kRow] = max(values.data[0])
     return mins, maxes
+
+# ==============================================================================================================================    
+# Species trees for two- & three-species analyses
+
+def WriteSpeciesTreeIDs_TwoThree(taxa, outFN):
+    """
+    Get the unrooted species tree for two or three species
+    Args:
+        taxa - list of species names
+    Returns:
+    
+    """
+    t = tree.Tree()
+    for s in taxa:
+        t.add_child(tree.TreeNode(name=s))
+    t.write(outfile=outFN)
+    
+def GetSpeciesTreeRoot_TwoTaxa(taxa):
+    speciesTreeFN_ids = files.FileHandler.GetSpeciesTreeUnrootedFN()
+    t = tree.Tree("(%s,%s);" % (taxa[0], taxa[1]))  
+    t.write(outfile=speciesTreeFN_ids)
+    return speciesTreeFN_ids
+
  

@@ -51,27 +51,6 @@ from orthofinder import nThreadsDefault as nThreads
 from orthofinder import my_env
 
    
-# ==============================================================================================================================    
-# Species trees for two- & three-species analyses
-
-def WriteSpeciesTreeIDs_TwoThree(taxa, outFN):
-    """
-    Get the unrooted species tree for two or three species
-    Args:
-        taxa - list of species names
-    Returns:
-    
-    """
-    t = tree.Tree()
-    for s in taxa:
-        t.add_child(tree.TreeNode(name=s))
-    t.write(outfile=outFN)
-    
-def GetSpeciesTreeRoot_TwoTaxa(taxa):
-    speciesTreeFN_ids = files.FileHandler.GetSpeciesTreeUnrootedFN()
-    t = tree.Tree("(%s,%s);" % (taxa[0], taxa[1]))  
-    t.write(outfile=speciesTreeFN_ids)
-    return speciesTreeFN_ids
 
 # ==============================================================================================================================      
 # Main
@@ -504,7 +483,7 @@ def InferGeneAndSpeciesTrees(ogSet,
         treeGen = trees_msa.TreesForOrthogroups(program_caller, msa_method, tree_method)
         if (not userSpeciesTree) and qLessThanFourSpecies:
             spTreeFN_ids = files.FileHandler.GetSpeciesTreeUnrootedFN()
-            WriteSpeciesTreeIDs_TwoThree(ogSet.seqsInfo.speciesToUse, spTreeFN_ids)
+            dendroblast.WriteSpeciesTreeIDs_TwoThree(ogSet.seqsInfo.speciesToUse, spTreeFN_ids)
             util.RenameTreeTaxa(spTreeFN_ids, files.FileHandler.GetSpeciesTreeUnrootedFN(True), ogSet.SpeciesDict(),
                                 qSupport=False, qFixNegatives=True)
         qDoMSASpeciesTree = (not qLessThanFourSpecies) and (not userSpeciesTree) and (not root_from_previous)
@@ -596,7 +575,7 @@ def RootSpeciesTree(ogSet, spTreeFN_ids, qSpeciesTreeSupports,
         qMultiple = False
         stride_dups = None
     elif len(ogSet.seqsInfo.speciesToUse) == 2:
-        hardcodeSpeciesTree = GetSpeciesTreeRoot_TwoTaxa(ogSet.seqsInfo.speciesToUse)
+        hardcodeSpeciesTree = dendroblast.GetSpeciesTreeRoot_TwoTaxa(ogSet.seqsInfo.speciesToUse)
         rootedSpeciesTreeFN = [hardcodeSpeciesTree]
         roots = [None]
         qMultiple = False
