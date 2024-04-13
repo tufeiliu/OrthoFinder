@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = ["setuptools", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -10,7 +10,7 @@ authors = [
 description = "Phylogenetic orthology inference for comparative genomics"
 readme = "README.md"
 version= "3.0.1"
-requires-python = ">=2.7"
+requires-python = ">=3.8"
 keywords = [
     "comparative genomics",
     "Orthology inference", 
@@ -32,15 +32,20 @@ classifiers = [
     'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
 
     # Specify the Python versions you support here.
-    #'Programming Language :: Python :: 2.7',
-    #'Programming Language :: Python :: 3.5',
-    #'Programming Language :: Python :: 3.6',
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
+    'Programming Language :: Python :: 2.7', # Untested
+    'Programming Language :: Python :: 3.5', # Untested
+    'Programming Language :: Python :: 3.6', # Untested
+    'Programming Language :: Python :: 3.7', # Untested
+    'Programming Language :: Python :: 3.8', # Untested
+    'Programming Language :: Python :: 3.9', # Untested
+    "Programming Language :: Python :: 3.10", # base version, tested
+    "Programming Language :: Python :: 3.11", # Untested
 ]
 dependencies = [
     "numpy",
-    "scipy"
+    "scipy",
+    "scikit-learn",
+    "biopython"
 ]
 
     [project.urls]
@@ -54,7 +59,15 @@ dependencies = [
         "pytest",
         "pytest-cov",
         "tox",
+        "pandas",
+        "seaborn",
         "delayed-assert",
+        "flake8",
+        "pylint",
+        "black",
+        "build",
+        "wheel",
+        "setuptools_scm"
     ]
 
     [project.scripts]
@@ -87,6 +100,7 @@ testpaths = ["tests"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "disabled: marks tests as disabled (deselect with '-m \"not disabled\"')",
+    "regression: marks a test as a regression test",
 ]
 
 [tool.mypy]
@@ -103,3 +117,10 @@ warn_unreachable = true
 warn_unused_configs = true
 no_implicit_reexport = true
 
+[tool.setuptools_scm]
+version_file = "src/orthofinder/_version.py"
+version_scheme = "guess-next-dev"
+root = "."  
+tag_regex = "^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$"
+fallback_version = "2.5.5"
+local_scheme = "dirty"

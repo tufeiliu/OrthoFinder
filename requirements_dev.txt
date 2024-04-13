@@ -8,3 +8,8 @@ seaborn
 pandas
 flake8
 pylint
+black
+build
+wheel
+setuptools_scm
+
