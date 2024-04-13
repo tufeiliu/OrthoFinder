@@ -52,7 +52,8 @@ By default, the output directory for each run is saved inside the data folder un
 Naming format: Results + abbreviated month name + date + (number of runs, the first one is unshown)
 Example: Results_Jan08_2
 
-To distinguish the results obtained via different scoring matrices, attaching `-fn` to the command can enable OrthoFinder to save the output in a folder with corresponding scoring matrix name and gap penalties appending to the convetional name.
-Command: `orthofinder -f ExampleData --matrix BLOSUM80 -fn`
-Example: Results_Feb28_5_BLOSUM80-10-1
+To distinguish the results obtained via different scoring matrices, attaching `-efn` to the command can enable OrthoFinder to save the output in a folder with the corresponding scoring matrix name, gap penalties as well as the used search program, MSA method and tree method appending to the convetional name.
+Command: `orthofinder -f ExampleData --matrix BLOSUM80 -efn`
+Example: Results_Feb28_5_BLOSUM80-10-1-diamond-mafft-fasttree
+(By default, orthofinder uses DIAMOND as the search program, MAFFT as the MSA method, FASTTREE as the tree method)
 """

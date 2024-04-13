@@ -36,7 +36,7 @@ if "benchmark" not in curr_benchmark_name:
 
 
 """
-Before running this test, please make sure the test data is obtained with the `-fn`.
+Before running this test, please make sure the test data is obtained with the `-efn`.
 """
 
 @pytest.fixture(scope="module")
